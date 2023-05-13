@@ -1,0 +1,13 @@
+obj/
+bin/
+.svn/
+.vs/
+packages
+/Tools/Tools.Bifa/Startups/Smart_Startup.cs
+/Tools/Tools.Hacker/Startups/Smart_Startup.cs
+/Tools/Tools.Hacker/Caching/SmartCaching.cs
+/Tools/Tools.Hacker/wwwroot/smart/index.html
+/Tools/Tools.Hacker/wwwroot/smart
+/Tools/Tools.Hacker/wwwroot/test/Visual.xml
+/Tools/Tools.ESport/wwwroot/client/esport-extensions.zip
+/Tools/Tools.ESport/wwwroot/client/1.0.9.zip
