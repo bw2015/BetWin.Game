@@ -138,8 +138,25 @@ namespace BetWin.Game.API.Handlers
         protected virtual GameResponse Request(GameRequest request)
         {
             Stopwatch sw = Stopwatch.StartNew();
-            string result = this.RequestAPI(request);
-            return new GameResponse(result, this.GetResultCode(result, out string message), message, (int)sw.ElapsedMilliseconds);
+            GameResponse response = default;
+            HttpResult result = default;
+            try
+            {
+                result = this.RequestAPI(request);
+                if (!result) throw new Exception(result);
+                return response = new GameResponse(result, this.GetResultCode(result, out string message), message, (int)sw.ElapsedMilliseconds, request);
+            }
+            catch (Exception ex)
+            {
+                return response = new GameResponse(result, GameResultCode.Exception, ex.Message, (int)sw.ElapsedMilliseconds, request);
+            }
+            finally
+            {
+                // 写入API请求日志
+                Console.WriteLine($"======== {DateTime.Now:yyyy-MM-dd HH:mm:ss} ========");
+                Console.WriteLine(request.Url);
+                Console.WriteLine(response.ToJson());
+            }
         }
 
         /// <summary>
@@ -147,6 +164,6 @@ namespace BetWin.Game.API.Handlers
         /// </summary>
         protected abstract GameResultCode GetResultCode(string result, out string message);
 
-        protected abstract string RequestAPI(GameRequest request);
+        protected abstract HttpResult RequestAPI(GameRequest request);
     }
 }

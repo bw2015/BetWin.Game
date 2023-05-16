@@ -13,7 +13,7 @@ namespace BetWin.Game.API.Responses
         {
         }
 
-        public decimal Money { get; internal set; }
+        public decimal? Money { get; internal set; }
         public string TransferID { get; internal set; }
         public GameAPITransferStatus Status { get; internal set; }
     }

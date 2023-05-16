@@ -49,6 +49,11 @@ namespace BetWin.Game.API.Utils
 
         public HttpResponseHeaders? Headers { get; internal set; }
 
+        public static implicit operator bool(HttpResult result)
+        {
+            return result.StatusCode == HttpStatusCode.OK;
+        }
+
         public static implicit operator string(HttpResult result)
         {
             return result.Content;

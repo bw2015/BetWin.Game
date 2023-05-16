@@ -10,6 +10,10 @@ namespace BetWin.Game.API.Enums
     public enum APIMethod
     {
         Login,
-        Logout
+        Logout,
+        Balance,
+        Transfer,
+        CheckTransfer,
+        GetOrder
     }
 }

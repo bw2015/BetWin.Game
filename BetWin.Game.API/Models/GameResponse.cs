@@ -10,12 +10,13 @@ namespace BetWin.Game.API.Models
     /// </summary>
     public struct GameResponse
     {
-        public GameResponse(string content, GameResultCode code, string message, int time)
+        public GameResponse(string content, GameResultCode code, string message, int time, GameRequest? request = null)
         {
             this.Content = content;
             this.Code = code;
             this.Message = message;
             this.Time = time;
+            this.Request = request;
         }
 
         /// <summary>
@@ -35,6 +36,11 @@ namespace BetWin.Game.API.Models
         /// </summary>
         public int Time;
 
+        /// <summary>
+        /// 请求参数
+        /// </summary>
+        public GameRequest? Request;
+
         public static implicit operator string(GameResponse response)
         {
             return response.Content;
@@ -43,6 +49,11 @@ namespace BetWin.Game.API.Models
         public static implicit operator GameResultCode(GameResponse response)
         {
             return response.Code;
+        }
+
+        public static implicit operator bool(GameResponse response)
+        {
+            return response.Code == GameResultCode.Success;
         }
     }
 }

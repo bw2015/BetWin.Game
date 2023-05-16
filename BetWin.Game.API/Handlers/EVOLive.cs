@@ -51,25 +51,84 @@ namespace BetWin.Game.API.Handlers
 
         public override Dictionary<Language, string> Languages => new Dictionary<Language, string>()
         {
+            {Language.CHN,"zh" },
+            {Language.ENG,"en" },
+            {Language.VI,"vi" },
+            {Language.TH,"th" },
+            {Language.IND,"id" },
+            {Language.HI,"hi" },
         };
 
         public override Dictionary<Currency, string> Currencies => new Dictionary<Currency, string>()
         {
-
+            { Currency.CNY,"CNY" },
+            { Currency.VND,"VND" },
+            { Currency.USD,"USD" },
+            { Currency.THB,"THB" },
+            { Currency.IDR,"IDR" },
+            { Currency.INR,"INR" },
         };
 
         public override BalanceResponse Balance(BalanceModel request)
         {
-            throw new NotImplementedException();
+            GameResponse response = this.Request(new GameRequest
+            {
+                Method = APIMethod.Balance,
+                Url = $"/api/ecashier?cCode=RWA&ecID={this.CasinoKey}&euID={request.PlayerName}&output=0"
+            });
+
+            if (response != GameResultCode.Success) return new BalanceResponse(response);
+            JObject info = JObject.Parse(response);
+            if (!info.ContainsKey("userbalance")) return new BalanceResponse(GameResultCode.Error);
+            return new BalanceResponse(response)
+            {
+                Balance = info["userbalance"]?["tbalance"]?.Value<decimal>() ?? decimal.Zero
+            };
         }
 
         public override CheckTransferResponse CheckTransfer(CheckTransferModel request)
         {
-            throw new NotImplementedException();
+            GameResponse response = this.Request(new GameRequest
+            {
+                Method = APIMethod.CheckTransfer,
+                Url = $"/api/ecashier?cCode=TRI&ecID={this.CasinoKey}&euID={request.PlayerName}&output=0&eTransID={request.OrderID}"
+            });
+
+            JObject? json = JObject.Parse(response);
+            return new CheckTransferResponse(response)
+            {
+                TransferID = request.OrderID,
+                Money = json?["transaction"]?["amount"]?.Value<decimal>(),
+                Status = response.Code switch
+                {
+                    GameResultCode.Exception => GameAPITransferStatus.Unknow,
+                    GameResultCode.Success => GameAPITransferStatus.Success,
+                    _ => GameAPITransferStatus.Faild
+                }
+            };
         }
 
         public override OrderResult GetOrder(QueryOrderModel request)
         {
+            DateTime startDate = WebAgent.GetTimestamps(request.StartTime);
+            DateTime endDate = WebAgent.GetTimestamps(request.EndTime);
+
+            if (endDate > DateTime.Now.AddMinutes(5)) endDate = DateTime.Now.AddMinutes(-5);
+            if (endDate - startDate > TimeSpan.FromDays(1)) endDate = startDate.AddDays(1);
+
+            startDate = startDate.GetTimeZone(0);
+            endDate = endDate.GetTimeZone(0);
+
+            GameResponse response = this.Request(new GameRequest
+            {
+                Method = APIMethod.GetOrder,
+                Url = $"{this.GameAPI}/api/gamehistory/v1/casino/games?startDate={startDate:yyyy-MM-ddTHH:mm:ssZ}&endDate={endDate:yyyy-MM-ddTHH:mm:ssZ}",
+                Option = new Dictionary<string, string>()
+                {
+                    { "Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{this.CasinoKey}:{this.APIToken}"))}" }
+                }
+            });
+
             throw new NotImplementedException();
         }
 
@@ -95,13 +154,6 @@ namespace BetWin.Game.API.Handlers
                 },
                 config = new
                 {
-                    game = new
-                    {
-                        table = new
-                        {
-                            id = request.StartCode
-                        }
-                    }
                 }
             });
 
@@ -118,12 +170,12 @@ namespace BetWin.Game.API.Handlers
 
             if (response != GameResultCode.Success) return new LoginResponse(response)
             {
-                 Message = response.Message
+                Message = response.Message
             };
             login? login = JsonConvert.DeserializeObject<login>(response);
             if (login == null) return new LoginResponse(GameResultCode.Error)
             {
-                 Message = response.Message
+                Message = response.Message
             };
 
             return new LoginResponse(GameResultCode.Success)
@@ -140,12 +192,43 @@ namespace BetWin.Game.API.Handlers
 
         public override RegisterResponse Register(RegisterModel request)
         {
-            throw new NotImplementedException();
+            return new RegisterResponse(GameResultCode.Success)
+            {
+                PlayerName = request.UserName
+            };
         }
 
         public override TransferResponse Transfer(TransferModel request)
         {
-            throw new NotImplementedException();
+            string cCode = "ECR";
+            if (request.Money < 0)
+            {
+                cCode = "EDB";
+            }
+            string url = $"/api/ecashier?cCode={cCode}&ecID={this.CasinoKey}&euID={request.PlayerName}&amount={Math.Abs(request.Money)}&eTransID={request.OrderID}&output=0";
+
+            GameResponse response = this.Request(new GameRequest
+            {
+                Url = url,
+                Method = APIMethod.Transfer
+            });
+
+            JObject? json = response ? JObject.Parse(response) : null;
+
+            return new TransferResponse(response.Code)
+            {
+                Money = request.Money,
+                OrderID = request.OrderID,
+                Balance = json?["transfer"]?["balance"]?.Value<decimal>(),
+                TransferID = json?["transfer"]?["etransid"]?.Value<string>() ?? string.Empty,
+                PlayerName = request.PlayerName,
+                Status = response.Code switch
+                {
+                    GameResultCode.Exception => GameAPITransferStatus.Unknow,
+                    GameResultCode.Success => GameAPITransferStatus.Success,
+                    _ => GameAPITransferStatus.Faild
+                }
+            };
         }
 
         #region ========  工具方法  ========
@@ -154,38 +237,72 @@ namespace BetWin.Game.API.Handlers
         {
             message = string.Empty;
             JObject json = JObject.Parse(result);
-            if (!json.ContainsKey("errors")) return GameResultCode.Success;
 
-            JArray? errors = json["errors"]?.Value<JArray>();
-            if (errors == null || !errors.Any()) return GameResultCode.Error;
-
-            message = errors[0]?["message"]?.Value<string>() ?? string.Empty;
-            string code = errors[0]?["code"]?.Value<string>() ?? string.Empty;
+            string code = string.Empty;
+            if (json.ContainsKey("error"))
+            {
+                code = message = json["error"]?["errormsg"]?.Value<string>() ?? string.Empty;
+                if (message.StartsWith("Transaction is not found for id"))
+                {
+                    code = "Transaction is not found";
+                }
+            }
+            else if (json.ContainsKey("errors"))
+            {
+                JArray? errors = json["errors"]?.Value<JArray>();
+                if (errors == null || !errors.Any()) return GameResultCode.Error;
+                message = errors[0]?["message"]?.Value<string>() ?? string.Empty;
+                code = errors[0]?["code"]?.Value<string>() ?? string.Empty;
+            }
+            else if (json.ContainsKey("transfer"))
+            {
+                code = json["transfer"]?["result"]?.Value<string>() ?? string.Empty;
+                if (code == "N")
+                {
+                    code = message = json["transfer"]?["errormsg"]?.Value<string>() ?? string.Empty;
+                }
+                if (code.StartsWith("Insufficient funds:")) code = "Insufficient funds";
+            }
+            else if (json.ContainsKey("_exception"))
+            {
+                code = "_exception";
+                message = json["_exception"]?.Value<string>() ?? string.Empty;
+            }
 
             return code switch
             {
                 "G.9" => GameResultCode.IPInvalid,
+                "Invalid casino" => GameResultCode.NoMerchant,
+                "Invalid user" => GameResultCode.NoPlayer,
+                "Amount not specified" => GameResultCode.MoneyInvalid,
+                "Insufficient funds" => GameResultCode.NoBalance,
+                "Transaction is not found" => GameResultCode.OrderNotFound,
+                "_exception" => GameResultCode.Exception,
+                "Y" => GameResultCode.Success,
+                "" => GameResultCode.Success,
                 _ => GameResultCode.Error
             };
         }
 
 
-        protected override string RequestAPI(GameRequest request)
+        protected override HttpResult RequestAPI(GameRequest request)
         {
-            string result = string.Empty;
-            HttpMethod? method = null;
+            HttpResult result = default;
+            HttpMethod? method;
             switch (request.Method)
             {
                 case APIMethod.Login:
                     method = HttpMethod.Post;
                     break;
-                case APIMethod.Logout:
+                default:
+                    method = HttpMethod.Get;
                     break;
             }
 
             if (method == null) throw new GameException($"未实现方法 {request.Method}");
 
-            string url = $"{this.APIHost}{request.Url}";
+            string url = request.Url;
+            if (!url.StartsWith("http")) url = $"{this.APIHost}{request.Url}";
             switch (method.Method)
             {
                 case "POST":
