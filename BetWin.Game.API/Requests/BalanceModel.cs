@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BetWin.Game.API.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,8 +13,13 @@ namespace BetWin.Game.API.Requests
         {
         }
 
+        /// <summary>
+        /// 用户的币种
+        /// </summary>
+        public Currency? Currency{ get; set; }
+
         public string PlayerName { get; set; }
 
-        public string Password { get; set; }
+        public string? Password { get; set; }
     }
 }

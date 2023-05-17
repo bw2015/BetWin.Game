@@ -38,6 +38,8 @@ namespace BetWin.Game.API.Responses
         /// </summary>
         public decimal? Balance { get; set; }
 
+        public Currency? Currency { get; set; }
+
         /// <summary>
         /// 转账后的状态
         /// </summary>

@@ -25,6 +25,7 @@ namespace BetWin.Game.API.Requests
         /// 玩家用户名
         /// </summary>
         public string PlayerName { get; set; }
+
         public string Password { get; set; }
 
         /// <summary>

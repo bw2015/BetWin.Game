@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace BetWin.Game.API.Handlers
 {
@@ -76,6 +77,19 @@ namespace BetWin.Game.API.Handlers
         /// 线路所支持的币种
         /// </summary>
         public abstract Dictionary<Currency, string> Currencies { get; }
+
+        /// <summary>
+        /// 转换币种
+        /// </summary>
+        protected virtual decimal ConvertCurrency(decimal money, ref Currency currency)
+        {
+            return money;
+        }
+
+        protected virtual Currency ConvertCurrency(string currency)
+        {
+            return this.Currencies?.FirstOrDefault(t => t.Value == currency).Key ?? (Currency)0;
+        }
 
         #region ========  通用的方法  ========
 

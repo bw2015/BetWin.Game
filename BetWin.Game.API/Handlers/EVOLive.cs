@@ -69,6 +69,23 @@ namespace BetWin.Game.API.Handlers
             { Currency.INR,"INR" },
         };
 
+        protected override decimal ConvertCurrency(decimal money, ref Currency currency)
+        {
+            switch (currency)
+            {
+                case Currency.KVND:
+                    currency = Currency.VND;
+                    money *= 1000M;
+                    break;
+                case Currency.KIDR:
+                    currency = Currency.IDR;
+                    money *= 1000M;
+                    break;
+            }
+
+            return money;
+        }
+
         public override BalanceResponse Balance(BalanceModel request)
         {
             GameResponse response = this.Request(new GameRequest
@@ -80,9 +97,19 @@ namespace BetWin.Game.API.Handlers
             if (response != GameResultCode.Success) return new BalanceResponse(response);
             JObject info = JObject.Parse(response);
             if (!info.ContainsKey("userbalance")) return new BalanceResponse(GameResultCode.Error);
+            decimal balance = info["userbalance"]?["tbalance"]?.Value<decimal>() ?? decimal.Zero;
+
+            balance /= request.Currency switch
+            {
+                Currency.KIDR => 1000M,
+                Currency.KVND => 1000M,
+                _ => 1M
+            };
+
             return new BalanceResponse(response)
             {
-                Balance = info["userbalance"]?["tbalance"]?.Value<decimal>() ?? decimal.Zero
+                Currency = request.Currency,
+                Balance = balance
             };
         }
 
@@ -129,7 +156,64 @@ namespace BetWin.Game.API.Handlers
                 }
             });
 
-            throw new NotImplementedException();
+            if (response != GameResultCode.Success) return new OrderResult(response);
+
+            OrderResult result = new OrderResult(response)
+            {
+                data = new List<OrderData>()
+            };
+
+            foreach (JObject item in JObject.Parse(response)?["data"]?.Value<JArray>() ?? new JArray())
+            {
+                foreach (var game in item["games"]?.Value<JArray>() ?? new JArray())
+                {
+                    decimal reward = game["payout"]?.Value<decimal>() ?? decimal.Zero,
+                        betMoney = game["wager"]?.Value<decimal>() ?? decimal.Zero,
+                        money = reward - betMoney;
+
+                    string status = game["status"]?.Value<string>() ?? string.Empty;
+                    GameAPIOrderStatus orderStatus = GameAPIOrderStatus.Wait;
+                    if (status == "Cancelled")
+                    {
+                        money = 0M;
+                        orderStatus = GameAPIOrderStatus.Return;
+                    }
+                    else if (status == "Resolved")
+                    {
+                        if (money > 0)
+                        {
+                            orderStatus = GameAPIOrderStatus.Win;
+                        }
+                        else if (money < 0)
+                        {
+                            orderStatus = GameAPIOrderStatus.Lose;
+                        }
+                        else
+                        {
+                            orderStatus = GameAPIOrderStatus.Return;
+                        }
+                    }
+
+                    result.data.Add(new OrderData
+                    {
+                        orderId = game["id"]?.Value<string>() ?? string.Empty,
+                        currency = this.ConvertCurrency(game["currency"]?.Value<string>() ?? string.Empty),
+                        playerName = game["participants"]?.Value<JArray>().FirstOrDefault()["playerId"]?.Value<string>() ?? string.Empty,
+                        createTime = WebAgent.GetTimestamps(game["startedAt"]?.Value<DateTime>() ?? new DateTime(1970, 1, 1)),
+                        gameCode = game["gameType"]?.Value<string>() ?? string.Empty,
+                        category = "Live",
+                        betMoney = betMoney,
+                        betAmount = Math.Min(Math.Abs(money), betMoney),
+                        money = money,
+                        settleTime = WebAgent.GetTimestamps(game["settledAt"]?.Value<DateTime>() ?? new DateTime(1970, 1, 1)),
+                        rawData = game.ToString(),
+                        status = orderStatus,
+                        hash = WebAgent.GetTimestamps(game["settledAt"]?.Value<DateTime>() ?? new DateTime(1970, 1, 1)).ToString()
+                    });
+                }
+            }
+
+            return result;
         }
 
         public override LoginResponse Login(LoginModel request)
@@ -205,7 +289,11 @@ namespace BetWin.Game.API.Handlers
             {
                 cCode = "EDB";
             }
-            string url = $"/api/ecashier?cCode={cCode}&ecID={this.CasinoKey}&euID={request.PlayerName}&amount={Math.Abs(request.Money)}&eTransID={request.OrderID}&output=0";
+
+            Currency currency = request.Currency;
+            decimal money = this.ConvertCurrency(request.Money, ref currency);
+
+            string url = $"/api/ecashier?cCode={cCode}&ecID={this.CasinoKey}&euID={request.PlayerName}&amount={Math.Abs(money)}&eTransID={request.OrderID}&output=0";
 
             GameResponse response = this.Request(new GameRequest
             {
@@ -215,11 +303,14 @@ namespace BetWin.Game.API.Handlers
 
             JObject? json = response ? JObject.Parse(response) : null;
 
+            decimal balance = json?["transfer"]?["balance"]?.Value<decimal>() ?? decimal.Zero;
+
             return new TransferResponse(response.Code)
             {
-                Money = request.Money,
+                Money = money,
+                Currency = currency,
                 OrderID = request.OrderID,
-                Balance = json?["transfer"]?["balance"]?.Value<decimal>(),
+                Balance = balance,
                 TransferID = json?["transfer"]?["etransid"]?.Value<string>() ?? string.Empty,
                 PlayerName = request.PlayerName,
                 Status = response.Code switch
@@ -340,6 +431,16 @@ namespace BetWin.Game.API.Handlers
             public string code { get; set; }
 
             public string message { get; set; }
+        }
+
+        class orderResponse
+        {
+            public order[] data { get; set; }
+        }
+
+        class order
+        {
+
         }
 
         #endregion
