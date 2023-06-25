@@ -65,6 +65,7 @@ namespace BetWin.Game.API.Handlers
     {
         public GameBase(string jsonString)
         {
+            if (string.IsNullOrEmpty(jsonString)) return;
             JsonConvert.PopulateObject(jsonString, this);
         }
 
@@ -79,16 +80,42 @@ namespace BetWin.Game.API.Handlers
         public abstract Dictionary<Currency, string> Currencies { get; }
 
         /// <summary>
-        /// 转换币种
+        /// 转换币值（专用于千单位币种转换）
         /// </summary>
-        protected virtual decimal ConvertCurrency(decimal money, ref Currency currency)
+        /// <param name="requestCurrency">请求币种</param>
+        /// <param name="targetCurrency">目标币种</param>
+        /// <returns>转换的币值</returns>
+        protected virtual decimal ConvertCurrency(decimal money, Currency? requestCurrency = null, Currency? targetCurrency = null)
         {
+            if (requestCurrency == null && targetCurrency == null) return money;
+            if (requestCurrency == targetCurrency) return money;
+
+            if (requestCurrency != null && targetCurrency == null)
+            {
+                return requestCurrency.Value switch
+                {
+                    Currency.KVND => money / 1000M,
+                    Currency.KIDR => money / 1000M,
+                    _ => money
+                };
+            }
+
+            if (requestCurrency == null && targetCurrency != null)
+            {
+                return targetCurrency.Value switch
+                {
+                    Currency.KVND => money * 1000M,
+                    Currency.KIDR => money * 1000M,
+                    _ => money
+                };
+            }
+
             return money;
         }
 
         protected virtual Currency ConvertCurrency(string currency)
         {
-            return this.Currencies?.FirstOrDefault(t => t.Value == currency).Key ?? (Currency)0;
+            return this.Currencies?.FirstOrDefault(t => t.Value == currency).Key ?? 0;
         }
 
         #region ========  通用的方法  ========

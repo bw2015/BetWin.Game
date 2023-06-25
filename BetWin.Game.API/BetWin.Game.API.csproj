@@ -11,7 +11,7 @@
     <Copyright>https://t.me/betwin2015</Copyright>
     <Authors>@betwin2015</Authors>
     <AssemblyVersion></AssemblyVersion>
-	<Version>1.0.1</Version>
+	<Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 

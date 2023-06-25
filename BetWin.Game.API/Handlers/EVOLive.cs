@@ -47,7 +47,7 @@ namespace BetWin.Game.API.Handlers
         [Description("APIToken")]
         public string? APIToken { get; set; }
 
-        #endregion
+        #endregion        
 
         public override Dictionary<Language, string> Languages => new Dictionary<Language, string>()
         {
@@ -69,22 +69,6 @@ namespace BetWin.Game.API.Handlers
             { Currency.INR,"INR" },
         };
 
-        protected override decimal ConvertCurrency(decimal money, ref Currency currency)
-        {
-            switch (currency)
-            {
-                case Currency.KVND:
-                    currency = Currency.VND;
-                    money *= 1000M;
-                    break;
-                case Currency.KIDR:
-                    currency = Currency.IDR;
-                    money *= 1000M;
-                    break;
-            }
-
-            return money;
-        }
 
         public override BalanceResponse Balance(BalanceModel request)
         {
@@ -99,12 +83,7 @@ namespace BetWin.Game.API.Handlers
             if (!info.ContainsKey("userbalance")) return new BalanceResponse(GameResultCode.Error);
             decimal balance = info["userbalance"]?["tbalance"]?.Value<decimal>() ?? decimal.Zero;
 
-            balance /= request.Currency switch
-            {
-                Currency.KIDR => 1000M,
-                Currency.KVND => 1000M,
-                _ => 1M
-            };
+            balance = this.ConvertCurrency(balance, request.Currency, null);
 
             return new BalanceResponse(response)
             {
@@ -122,10 +101,18 @@ namespace BetWin.Game.API.Handlers
             });
 
             JObject? json = JObject.Parse(response);
+            decimal? money = json?["transaction"]?["amount"]?.Value<decimal>();
+
+            if (money != null)
+            {
+                money = this.ConvertCurrency(money.Value, request.Currency, null);
+            }
+
             return new CheckTransferResponse(response)
             {
                 TransferID = request.OrderID,
-                Money = json?["transaction"]?["amount"]?.Value<decimal>(),
+                Currency = request.Currency,
+                Money = money,
                 Status = response.Code switch
                 {
                     GameResultCode.Exception => GameAPITransferStatus.Unknow,
@@ -141,9 +128,12 @@ namespace BetWin.Game.API.Handlers
             DateTime endDate = WebAgent.GetTimestamps(request.EndTime);
 
             if (endDate > DateTime.Now.AddMinutes(5)) endDate = DateTime.Now.AddMinutes(-5);
-            if (endDate - startDate > TimeSpan.FromDays(1)) endDate = startDate.AddDays(1);
+            if (endDate - startDate > TimeSpan.FromDays(1))
+            {
+                endDate = startDate.AddDays(1);
+            }
 
-            startDate = startDate.GetTimeZone(0);
+            startDate = startDate.GetTimeZone(0).AddMinutes(-60);
             endDate = endDate.GetTimeZone(0);
 
             GameResponse response = this.Request(new GameRequest
@@ -290,8 +280,7 @@ namespace BetWin.Game.API.Handlers
                 cCode = "EDB";
             }
 
-            Currency currency = request.Currency;
-            decimal money = this.ConvertCurrency(request.Money, ref currency);
+            decimal money = this.ConvertCurrency(request.Money, targetCurrency: request.Currency);
 
             string url = $"/api/ecashier?cCode={cCode}&ecID={this.CasinoKey}&euID={request.PlayerName}&amount={Math.Abs(money)}&eTransID={request.OrderID}&output=0";
 
@@ -301,14 +290,26 @@ namespace BetWin.Game.API.Handlers
                 Method = APIMethod.Transfer
             });
 
+            if (response.Code != GameResultCode.Success)
+            {
+                return new TransferResponse(response.Code)
+                {
+                    Currency = request.Currency,
+                    Money = request.Money,
+                    Message = response.Message,
+                    Status = response.Code == GameResultCode.Exception ? GameAPITransferStatus.Unknow : GameAPITransferStatus.Faild
+                };
+            }
+
             JObject? json = response ? JObject.Parse(response) : null;
 
-            decimal balance = json?["transfer"]?["balance"]?.Value<decimal>() ?? decimal.Zero;
+
+            decimal? balance = json?["transfer"]?["balance"]?.Value<decimal>();
 
             return new TransferResponse(response.Code)
             {
-                Money = money,
-                Currency = currency,
+                Currency = request.Currency,
+                Money = request.Money,
                 OrderID = request.OrderID,
                 Balance = balance,
                 TransferID = json?["transfer"]?["etransid"]?.Value<string>() ?? string.Empty,
@@ -397,7 +398,7 @@ namespace BetWin.Game.API.Handlers
             switch (method.Method)
             {
                 case "POST":
-                    result = NetAgent.PostAsync(url, request.Data, Encoding.UTF8, request.Option).Result;
+                    result = NetAgent.PostAsync(url, (string)request.Data, Encoding.UTF8, request.Option).Result;
                     break;
                 case "GET":
                     result = NetAgent.GetAsync(url, Encoding.UTF8, request.Option).Result;
@@ -417,7 +418,7 @@ namespace BetWin.Game.API.Handlers
         /// </summary>
         class login
         {
-            public string entry { get; set; }
+            public string? entry { get; set; }
         }
 
         //"{\"errors\":[{\"code\":\"G.9\",\"message\":\"Clients IP address have been rejected\"}]}"

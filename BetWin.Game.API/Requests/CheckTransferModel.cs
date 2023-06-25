@@ -23,6 +23,11 @@ namespace BetWin.Game.API.Requests
         /// </summary>
         public string OrderID { get; set; }
 
+        /// <summary>
+        /// 请求的币种
+        /// </summary>
+        public Currency? Currency { get; set; }
+
         public GameAPIAction Action { get; set; }
     }
 }

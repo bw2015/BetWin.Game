@@ -14,6 +14,7 @@ namespace BetWin.Game.API.Enums
         Balance,
         Transfer,
         CheckTransfer,
-        GetOrder
+        GetOrder,
+        Register
     }
 }

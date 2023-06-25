@@ -314,6 +314,9 @@ namespace BetWin.Game.API.Enums
         BYN = 72,
         [Description("伯利兹元")]
         BZD = 73,
+        /// <summary>
+        /// 刚果法郎
+        /// </summary>
         [Description("刚果法郎")]
         CDF = 74,
         [Description("刚果法郎")]
@@ -620,6 +623,8 @@ namespace BetWin.Game.API.Enums
         /// </summary>
         [Description("千蒙古图格里克")]
         KMNT = 178,
+        [Description("委内瑞拉玻利瓦尔")]
+        VES = 179,
     }
 
     /// <summary>

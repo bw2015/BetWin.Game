@@ -33,7 +33,7 @@ namespace BetWin.Game.API.Utils
         {
             get
             {
-                return this.Headers?.Get(nameof(Referrer),string.Empty) ?? string.Empty;
+                return this.Headers?.Get(nameof(Referrer), string.Empty) ?? string.Empty;
             }
             set
             {

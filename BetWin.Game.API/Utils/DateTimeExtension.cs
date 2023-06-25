@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BetWin.Game.API.Utils
 {
-    public static class DateTimeExtension
+    internal static class DateTimeExtension
     {
         /// <summary>
         /// 获取时区时间

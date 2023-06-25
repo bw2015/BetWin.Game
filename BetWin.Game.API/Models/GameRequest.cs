@@ -24,11 +24,13 @@ namespace BetWin.Game.API.Models
         /// <summary>
         /// 请求数据
         /// </summary>
-        public string Data;
+        public object Data;
 
         /// <summary>
         /// 请求的参数
         /// </summary>
         public HttpClientOption Option;
+
+       
     }
 }

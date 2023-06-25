@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BetWin.Game.API.Utils
 {
-    public static class JsonExtensions
+    internal static class JsonExtensions
     {
         /// <summary>
         /// 转化成为json对象
