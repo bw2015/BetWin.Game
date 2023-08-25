@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BetWin.Game.API.Utils
 {
-    public struct HttpResult
+    internal struct HttpResult
     {
         public HttpResult(Exception ex, string url) : this()
         {

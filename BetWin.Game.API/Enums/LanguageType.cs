@@ -8,7 +8,7 @@ namespace BetWin.Game.API.Enums
     /// <summary>
     /// 语种
     /// </summary>
-    public enum Language : byte
+    public enum LanguageType : byte
     {
         /// <summary>
         /// 简体中文

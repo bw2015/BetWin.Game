@@ -25,6 +25,8 @@ namespace BetWin.Game.Lottery.Enums
         [Description("越南南部彩")]
         YNCS = 7,
         [Description("幸运3")]
-        Lucky3 = 8
+        Lucky3 = 8,
+        [Description("小游戏")]
+        Smart = 9
     }
 }

@@ -49,24 +49,24 @@ namespace BetWin.Game.API.Handlers
 
         #endregion        
 
-        public override Dictionary<Language, string> Languages => new Dictionary<Language, string>()
+        public override Dictionary<LanguageType, string> Languages => new Dictionary<LanguageType, string>()
         {
-            {Language.CHN,"zh" },
-            {Language.ENG,"en" },
-            {Language.VI,"vi" },
-            {Language.TH,"th" },
-            {Language.IND,"id" },
-            {Language.HI,"hi" },
+            {LanguageType.CHN,"zh" },
+            {LanguageType.ENG,"en" },
+            {LanguageType.VI,"vi" },
+            {LanguageType.TH,"th" },
+            {LanguageType.IND,"id" },
+            {LanguageType.HI,"hi" },
         };
 
-        public override Dictionary<Currency, string> Currencies => new Dictionary<Currency, string>()
+        public override Dictionary<CurrencyType, string> Currencies => new Dictionary<CurrencyType, string>()
         {
-            { Currency.CNY,"CNY" },
-            { Currency.VND,"VND" },
-            { Currency.USD,"USD" },
-            { Currency.THB,"THB" },
-            { Currency.IDR,"IDR" },
-            { Currency.INR,"INR" },
+            { CurrencyType.CNY,"CNY" },
+            { CurrencyType.VND,"VND" },
+            { CurrencyType.USD,"USD" },
+            { CurrencyType.THB,"THB" },
+            { CurrencyType.IDR,"IDR" },
+            { CurrencyType.INR,"INR" },
         };
 
 
@@ -377,7 +377,7 @@ namespace BetWin.Game.API.Handlers
         }
 
 
-        protected override HttpResult RequestAPI(GameRequest request)
+        internal override HttpResult RequestAPI(GameRequest request)
         {
             HttpResult result = default;
             HttpMethod? method;

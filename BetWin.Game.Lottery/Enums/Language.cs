@@ -8,7 +8,7 @@ namespace BetWin.Game.Lottery.Enums
     /// <summary>
     /// 语种
     /// </summary>
-    public enum Language : byte
+    internal enum Language : byte
     {
         /// <summary>
         /// 简体中文

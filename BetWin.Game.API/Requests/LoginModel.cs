@@ -29,12 +29,12 @@ namespace BetWin.Game.API.Requests
         /// <summary>
         /// 币种
         /// </summary>
-        public Currency Currency { get; set; }
+        public CurrencyType Currency { get; set; }
 
         /// <summary>
         /// 语种
         /// </summary>
-        public Language Language { get; set; }
+        public LanguageType Language { get; set; }
 
         /// <summary>
         /// 要进入的游戏代码

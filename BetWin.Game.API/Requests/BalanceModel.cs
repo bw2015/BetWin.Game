@@ -16,7 +16,7 @@ namespace BetWin.Game.API.Requests
         /// <summary>
         /// 用户的币种
         /// </summary>
-        public Currency? Currency{ get; set; }
+        public CurrencyType? Currency{ get; set; }
 
         public string PlayerName { get; set; }
 

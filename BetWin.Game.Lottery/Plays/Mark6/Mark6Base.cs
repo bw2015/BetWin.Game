@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace BetWin.Game.Lottery.Mark6
+namespace BetWin.Game.Lottery.Plays.Mark6
 {
     /// <summary>
     /// 六合彩玩法的基类
@@ -56,8 +56,6 @@ namespace BetWin.Game.Lottery.Mark6
         /// 头数
         /// </summary>
         protected readonly string[] HEAD = new[] { "0Head", "1Head", "2Head", "3Head", "4Head" };
-
-        protected override IEnumerable<BetContentTranslate> betContentTranslate => this.NUMBERS.Select(t => new BetContentTranslate(t));
 
         protected override bool CheckBetContent(string content)
         {

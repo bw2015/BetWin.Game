@@ -13,7 +13,7 @@ namespace BetWin.Game.API.Responses
         {
         }
 
-        public Currency? Currency { get; set; }
+        public CurrencyType? Currency { get; set; }
 
         public decimal Balance { get; set; }
 

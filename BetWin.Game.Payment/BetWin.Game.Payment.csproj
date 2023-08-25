@@ -6,16 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Attributes\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="SP.StudioCore.Ioc" Version="1.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\SP.Studio\SP.StudioCore.Net.Http\SP.StudioCore.Net.Http.csproj" />
   </ItemGroup>
 
 </Project>

@@ -19,7 +19,7 @@ namespace BetWin.Game.API.Responses
         /// <summary>
         /// 币种
         /// </summary>
-        public Currency? Currency { get; internal set; }
+        public CurrencyType? Currency { get; internal set; }
 
         /// <summary>
         /// 转账的金额（如果接口有返回的话）

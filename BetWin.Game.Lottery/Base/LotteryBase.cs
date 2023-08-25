@@ -23,6 +23,12 @@ namespace BetWin.Game.Lottery.Base
         /// <param name="odds">赔率</param>
         /// <returns>中奖倍数</returns>
         public RewardOdds GetReward(string input, OpenNumber openNumber, Odds odds);
+
+        /// <summary>
+        /// 获取当前的默认赔率
+        /// </summary>
+        /// <returns></returns>
+        public Odds GetDefaultOdds();
     }
 
     /// <summary>
@@ -46,7 +52,7 @@ namespace BetWin.Game.Lottery.Base
         /// <returns></returns>
         protected abstract Odds DefaultOdds { get; }
 
-        protected abstract IEnumerable<BetContentTranslate> betContentTranslate { get; }
+        public Odds GetDefaultOdds() => this.DefaultOdds;
 
         /// <summary>
         /// 判断是否中奖

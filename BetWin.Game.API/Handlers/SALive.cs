@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml.Linq;
 
@@ -53,103 +54,103 @@ namespace BetWin.Game.API.Handlers
         {
         }
 
-        public override Dictionary<Language, string> Languages => new Dictionary<Language, string>()
+        public override Dictionary<LanguageType, string> Languages => new Dictionary<LanguageType, string>()
         {
-            {Language.ENG,"en_US" },
-            {Language.ES,"es" },
-            {Language.HI,"hi" },
-            {Language.IND,"id" },
-            {Language.JA,"jp" },
-            {Language.PT,"pt" },
-            {Language.MY,"ms" },
-            {Language.TH,"th" },
-            {Language.VI,"vn" },
-            {Language.CHN,"zh_CN" },
-            {Language.THN,"zh_TW" }
+            {LanguageType.ENG,"en_US" },
+            {LanguageType.ES,"es" },
+            {LanguageType.HI,"hi" },
+            {LanguageType.IND,"id" },
+            {LanguageType.JA,"jp" },
+            {LanguageType.PT,"pt" },
+            {LanguageType.MY,"ms" },
+            {LanguageType.TH,"th" },
+            {LanguageType.VI,"vn" },
+            {LanguageType.CHN,"zh_CN" },
+            {LanguageType.THN,"zh_TW" }
         };
 
-        public override Dictionary<Currency, string> Currencies => new Dictionary<Currency, string>()
+        public override Dictionary<CurrencyType, string> Currencies => new Dictionary<CurrencyType, string>()
         {
-            {Currency.AED,"AED" },
-            {Currency.AMD,"AMD" },
-            {Currency.ARS,"ARS" },
-            {Currency.AUD,"AUD" },
-            {Currency.AZN,"AZN" },
-            {Currency.BDT,"BDT" },
-            {Currency.BND,"BND" },
-            {Currency.BRL,"BRL" },
-            {Currency.BYN,"BYN" },
+            {CurrencyType.AED,"AED" },
+            {CurrencyType.AMD,"AMD" },
+            {CurrencyType.ARS,"ARS" },
+            {CurrencyType.AUD,"AUD" },
+            {CurrencyType.AZN,"AZN" },
+            {CurrencyType.BDT,"BDT" },
+            {CurrencyType.BND,"BND" },
+            {CurrencyType.BRL,"BRL" },
+            {CurrencyType.BYN,"BYN" },
 
-            {Currency.CAD,"CAD" },
-            {Currency.CHF,"CHF" },
-            {Currency.CLP,"CLP" },
-            {Currency.CZK,"CZK" },
-            {Currency.DKK,"DKK" },
-            {Currency.EUR,"EUR" },
-            {Currency.GBP,"GBP" },
-            {Currency.GEL,"GEL" },
-            {Currency.GHS,"GHS" },
-            {Currency.HTG,"HTG" },
-            {Currency.HUF,"HUF" },
+            {CurrencyType.CAD,"CAD" },
+            {CurrencyType.CHF,"CHF" },
+            {CurrencyType.CLP,"CLP" },
+            {CurrencyType.CZK,"CZK" },
+            {CurrencyType.DKK,"DKK" },
+            {CurrencyType.EUR,"EUR" },
+            {CurrencyType.GBP,"GBP" },
+            {CurrencyType.GEL,"GEL" },
+            {CurrencyType.GHS,"GHS" },
+            {CurrencyType.HTG,"HTG" },
+            {CurrencyType.HUF,"HUF" },
 
-            {Currency.INR,"INR" },
-            {Currency.IQD,"IQD" },
-            {Currency.JPY,"JPY" },
-            {Currency.KES,"KES" },
+            {CurrencyType.INR,"INR" },
+            {CurrencyType.IQD,"IQD" },
+            {CurrencyType.JPY,"JPY" },
+            {CurrencyType.KES,"KES" },
 
-            {Currency.KGS,"KGS" },
-            {Currency.KZT,"KZT" },
-            {Currency.LKR,"LKR" },
-            {Currency.MDL,"MDL" },
-            {Currency.MXN,"MXN" },
-            {Currency.MYR,"MYR" },
+            {CurrencyType.KGS,"KGS" },
+            {CurrencyType.KZT,"KZT" },
+            {CurrencyType.LKR,"LKR" },
+            {CurrencyType.MDL,"MDL" },
+            {CurrencyType.MXN,"MXN" },
+            {CurrencyType.MYR,"MYR" },
 
-            {Currency.BTC,"mXBT" },
+            {CurrencyType.BTC,"mXBT" },
 
-            {Currency.NAD,"NAD" },
-            {Currency.NGN,"NGN" },
-            {Currency.NOK,"NOK" },
-            {Currency.NZD,"NZD" },
-            {Currency.PEN,"PEN" },
-            {Currency.PHP,"PHP" },
-            {Currency.PKR,"PKR" },
-            {Currency.PLN,"PLN" },
-            {Currency.RUB,"RUB" },
+            {CurrencyType.NAD,"NAD" },
+            {CurrencyType.NGN,"NGN" },
+            {CurrencyType.NOK,"NOK" },
+            {CurrencyType.NZD,"NZD" },
+            {CurrencyType.PEN,"PEN" },
+            {CurrencyType.PHP,"PHP" },
+            {CurrencyType.PKR,"PKR" },
+            {CurrencyType.PLN,"PLN" },
+            {CurrencyType.RUB,"RUB" },
 
-            {Currency.SEK,"SEK" },
-            {Currency.SGD,"SGD" },
-            {Currency.THB,"THB" },
-            {Currency.TND,"TND" },
-            {Currency.TMT,"TMT" },
-            {Currency.TRY,"TRY" },
+            {CurrencyType.SEK,"SEK" },
+            {CurrencyType.SGD,"SGD" },
+            {CurrencyType.THB,"THB" },
+            {CurrencyType.TND,"TND" },
+            {CurrencyType.TMT,"TMT" },
+            {CurrencyType.TRY,"TRY" },
 
-            {Currency.TWD,"TWD" },
-            {Currency.UAH,"UAH" },
-            {Currency.USD,"USD" },
-            {Currency.USDT,"USDT" },
-            {Currency.VES,"VES" },
-            {Currency.XAF,"XAF" },
-            {Currency.XOF,"XOF" },
-            {Currency.ZAR,"ZAR" },
-            {Currency.ZMW,"ZMW" },
+            {CurrencyType.TWD,"TWD" },
+            {CurrencyType.UAH,"UAH" },
+            {CurrencyType.USD,"USD" },
+            {CurrencyType.USDT,"USDT" },
+            {CurrencyType.VES,"VES" },
+            {CurrencyType.XAF,"XAF" },
+            {CurrencyType.XOF,"XOF" },
+            {CurrencyType.ZAR,"ZAR" },
+            {CurrencyType.ZMW,"ZMW" },
 
-            {Currency.CDF,"CDF2" },
-            {Currency.COP,"COP2" },
-            {Currency.IDR,"IDR2" },
-            {Currency.IRR,"IRR2" },
-            {Currency.LAK,"LAK2" },
+            {CurrencyType.CDF,"CDF2" },
+            {CurrencyType.COP,"COP2" },
+            {CurrencyType.IDR,"IDR2" },
+            {CurrencyType.IRR,"IRR2" },
+            {CurrencyType.LAK,"LAK2" },
 
-            {Currency.MMK,"MMK2" },
-            {Currency.TZS,"TZS2" },
-            {Currency.UGX,"UGX2" },
-            {Currency.UZS,"UZS2" },
-            {Currency.VND,"VND2" },
+            {CurrencyType.MMK,"MMK2" },
+            {CurrencyType.TZS,"TZS2" },
+            {CurrencyType.UGX,"UGX2" },
+            {CurrencyType.UZS,"UZS2" },
+            {CurrencyType.VND,"VND2" },
 
-            {Currency.KIDR,"IDR" },
-            {Currency.KKHR,"KHR" },
-            {Currency.KLAK,"LAK" },
-            {Currency.KMMK,"MMK" },
-            {Currency.KVND,"VND" }
+            {CurrencyType.KIDR,"IDR" },
+            {CurrencyType.KKHR,"KHR" },
+            {CurrencyType.KLAK,"LAK" },
+            {CurrencyType.KMMK,"MMK" },
+            {CurrencyType.KVND,"VND" }
         };
 
         public override BalanceResponse Balance(BalanceModel request)
@@ -345,7 +346,9 @@ namespace BetWin.Game.API.Handlers
 
         public override TransferResponse Transfer(TransferModel request)
         {
-            string orderId = $"{(request.Money > 0 ? "IN" : "OUT")}{DateTime.Now:yyyyMMddHHmmss}{request.PlayerName}";
+            if (!Regex.IsMatch(request.OrderID, @"^(IN|OUT)\d{12}\w+$")) return new TransferResponse(GameResultCode.TransferInvalid);
+
+            string orderId = request.OrderID;
             Dictionary<string, string> data = new Dictionary<string, string>()
             {
                 {"method",request.Money > 0 ? "CreditBalanceDV" : "DebitBalanceDV" },
@@ -448,7 +451,7 @@ namespace BetWin.Game.API.Handlers
             };
         }
 
-        protected override HttpResult RequestAPI(GameRequest request)
+        internal override HttpResult RequestAPI(GameRequest request)
         {
             Dictionary<string, string>? data = (Dictionary<string, string>)request.Data;
             if (data == null) return new HttpResult(new Exception("参数错误"), this.gateway);

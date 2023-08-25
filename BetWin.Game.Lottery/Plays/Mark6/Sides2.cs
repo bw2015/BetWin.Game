@@ -1,11 +1,8 @@
-﻿using BetWin.Game.Lottery.Attributes;
-using BetWin.Game.Lottery.Models;
+﻿using BetWin.Game.Lottery.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace BetWin.Game.Lottery.Mark6
+namespace BetWin.Game.Lottery.Plays.Mark6
 {
     /// <summary>
     /// 1.特码-双面

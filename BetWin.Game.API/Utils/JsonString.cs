@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BetWin.Game.API.Utils
 {
-    public struct JsonString : IEquatable<JsonString>
+    internal struct JsonString : IEquatable<JsonString>
     {
         private readonly string _jsonString;
 

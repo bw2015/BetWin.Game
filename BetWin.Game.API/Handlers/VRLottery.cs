@@ -43,9 +43,9 @@ namespace BetWin.Game.API.Handlers
         {
         }
 
-        public override Dictionary<Language, string> Languages => new Dictionary<Language, string>();
+        public override Dictionary<LanguageType, string> Languages => new Dictionary<LanguageType, string>();
 
-        public override Dictionary<Currency, string> Currencies => new Dictionary<Currency, string>();
+        public override Dictionary<CurrencyType, string> Currencies => new Dictionary<CurrencyType, string>();
 
         public override BalanceResponse Balance(BalanceModel request)
         {
@@ -140,7 +140,7 @@ namespace BetWin.Game.API.Handlers
 
         }
 
-        protected override HttpResult RequestAPI(GameRequest request)
+        internal override HttpResult RequestAPI(GameRequest request)
         {
             string url = $"{this.gateway}{request.Url}";
             HttpResult result = NetAgent.PostAsync(url, (string)request.Data).Result;

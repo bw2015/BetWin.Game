@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "BetWin.Game.Lottery": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:4282;http://localhost:4284"
+    }
+  }
+}

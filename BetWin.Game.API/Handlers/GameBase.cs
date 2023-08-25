@@ -13,9 +13,9 @@ namespace BetWin.Game.API.Handlers
 {
     public interface IGameHandler
     {
-        public Dictionary<Language, string> Languages { get; }
+        public Dictionary<LanguageType, string> Languages { get; }
 
-        public Dictionary<Currency, string> Currencies { get; }
+        public Dictionary<CurrencyType, string> Currencies { get; }
 
         /// <summary>
         /// 注册
@@ -54,7 +54,6 @@ namespace BetWin.Game.API.Handlers
         /// </summary>
         public OrderResult GetOrder(QueryOrderModel request);
 
-
         /// <summary>
         /// 回调支持
         /// </summary>
@@ -72,12 +71,12 @@ namespace BetWin.Game.API.Handlers
         /// <summary>
         /// 当前线路所支持的语种
         /// </summary>
-        public abstract Dictionary<Language, string> Languages { get; }
+        public abstract Dictionary<LanguageType, string> Languages { get; }
 
         /// <summary>
         /// 线路所支持的币种
         /// </summary>
-        public abstract Dictionary<Currency, string> Currencies { get; }
+        public abstract Dictionary<CurrencyType, string> Currencies { get; }
 
         /// <summary>
         /// 转换币值（专用于千单位币种转换）
@@ -85,7 +84,7 @@ namespace BetWin.Game.API.Handlers
         /// <param name="requestCurrency">请求币种</param>
         /// <param name="targetCurrency">目标币种</param>
         /// <returns>转换的币值</returns>
-        protected virtual decimal ConvertCurrency(decimal money, Currency? requestCurrency = null, Currency? targetCurrency = null)
+        protected virtual decimal ConvertCurrency(decimal money, CurrencyType? requestCurrency = null, CurrencyType? targetCurrency = null)
         {
             if (requestCurrency == null && targetCurrency == null) return money;
             if (requestCurrency == targetCurrency) return money;
@@ -94,8 +93,8 @@ namespace BetWin.Game.API.Handlers
             {
                 return requestCurrency.Value switch
                 {
-                    Currency.KVND => money / 1000M,
-                    Currency.KIDR => money / 1000M,
+                    CurrencyType.KVND => money / 1000M,
+                    CurrencyType.KIDR => money / 1000M,
                     _ => money
                 };
             }
@@ -104,8 +103,8 @@ namespace BetWin.Game.API.Handlers
             {
                 return targetCurrency.Value switch
                 {
-                    Currency.KVND => money * 1000M,
-                    Currency.KIDR => money * 1000M,
+                    CurrencyType.KVND => money * 1000M,
+                    CurrencyType.KIDR => money * 1000M,
                     _ => money
                 };
             }
@@ -113,7 +112,7 @@ namespace BetWin.Game.API.Handlers
             return money;
         }
 
-        protected virtual Currency ConvertCurrency(string currency)
+        protected virtual CurrencyType ConvertCurrency(string currency)
         {
             return this.Currencies?.FirstOrDefault(t => t.Value == currency).Key ?? 0;
         }
@@ -205,6 +204,12 @@ namespace BetWin.Game.API.Handlers
         /// </summary>
         protected abstract GameResultCode GetResultCode(string result, out string message);
 
-        protected abstract HttpResult RequestAPI(GameRequest request);
+        internal abstract HttpResult RequestAPI(GameRequest request);
+
+        [Obsolete("临时方法")]
+        public object ToSettingObject()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

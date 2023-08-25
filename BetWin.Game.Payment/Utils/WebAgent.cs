@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BetWin.Game.Lottery.Utils
+namespace BetWin.Game.Payment.Utils
 {
     internal static class WebAgent
     {

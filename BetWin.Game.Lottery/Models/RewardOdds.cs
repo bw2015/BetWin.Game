@@ -33,7 +33,8 @@ namespace BetWin.Game.Lottery.Models
 
         public static implicit operator decimal(RewardOdds odds)
         {
-            return odds.Odds;
+            return Math.Round(odds.Odds, 4);
         }
+
     }
 }

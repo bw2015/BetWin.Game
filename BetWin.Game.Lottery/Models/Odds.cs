@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BetWin.Game.Lottery.Models
@@ -48,6 +50,37 @@ namespace BetWin.Game.Lottery.Models
         {
             if (_data.ContainsKey(content)) return _data[content];
             return decimal.Zero;
+        }
+
+        public override string ToString()
+        {
+            return this.ToString(2000);
+        }
+
+        /// <summary>
+        /// 根据用户的发点返回玩法赔率
+        /// </summary>
+        /// <param name="rebate">最大值2000</param>
+        /// <returns></returns>
+        public string ToString(int rebate)
+        {
+            rebate = Math.Min(2000, rebate);
+            StringBuilder sb = new StringBuilder("{")
+               .Append(string.Join(",", this._data.Select(t => $"\"{t.Key}\":{Math.Floor(t.Value * (decimal)rebate / 2000M * 100M) / 100M}")))
+               .Append("}");
+            return sb.ToString();
+        }
+
+        public static Odds operator +(Odds odds1, Odds odds2)
+        {
+            foreach (string key in odds2._data.Keys)
+            {
+                if (odds1.GetOdds(key) == decimal.Zero || odds1.GetOdds(key) > odds2.GetOdds(key))
+                {
+                    odds1.Add(key, odds2._data[key]);
+                }
+            }
+            return odds1;
         }
     }
 }
