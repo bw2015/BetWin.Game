@@ -12,7 +12,6 @@ namespace BetWin.Game.Lottery.Models
     /// </summary>
     public struct Odds
     {
-
         /// <summary>
         /// 赔率数据（不同的投注内容对应的赔率）
         /// </summary>

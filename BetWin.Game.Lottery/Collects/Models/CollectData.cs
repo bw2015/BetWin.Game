@@ -30,5 +30,10 @@ namespace BetWin.Game.Lottery.Collects.Models
         /// 开奖号码
         /// </summary>
         public string Number;
+
+        public static implicit operator bool(CollectData data)
+        {
+            return !string.IsNullOrEmpty(data.Index) && data.OpenTime != 0 && !string.IsNullOrEmpty(data.Number);
+        }
     }
 }

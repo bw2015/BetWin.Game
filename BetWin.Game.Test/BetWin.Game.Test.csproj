@@ -1,17 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SP.StudioCore" Version="6.0.9" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\BetWin.Game.API\BetWin.Game.API.csproj" />
+    <ProjectReference Include="..\BetWin.Game.Lottery\BetWin.Game.Lottery.csproj" />
+    <ProjectReference Include="..\BetWin.Game.Payment\BetWin.Game.Payment.csproj" />
   </ItemGroup>
 
 </Project>

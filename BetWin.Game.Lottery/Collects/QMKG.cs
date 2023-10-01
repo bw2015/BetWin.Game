@@ -46,7 +46,15 @@ namespace BetWin.Game.Lottery.Collects
         /// </summary>
         public string playTimeSetting { get; set; } = "{\"ts\":\"1692621141\",\"sign\":\"ac1c7850087f08c7abd0819dbdecb15bcf5d9f1f5c4251f2691c22051c652e25\"}";
 
+        /// <summary>
+        /// 获取开奖的接口
+        /// </summary>
+        public string getPlayUserResultUrl { get; set; } = "https://apigame.kg.qq.com/kg.wh_rocket.Rocket/GetPlayUserResult";
 
+        /// <summary>
+        /// 实时开奖接口的签名配置
+        /// </summary>
+        public string getPlayUserResultSetting { get; set; } = "{\"ts\":\"1692621141\",\"sign\":\"ac1c7850087f08c7abd0819dbdecb15bcf5d9f1f5c4251f2691c22051c652e25\"}";
 
         public QMKG(string setting) : base(setting)
         {
@@ -62,10 +70,22 @@ namespace BetWin.Game.Lottery.Collects
                 {this.getHeaderKey(nameof(x_gopen_app_id)), this.x_gopen_app_id },
                 {"Content-Type","application/json" },
                 {"Accept","application/json" },
-                {"Accept-Encoding","gzip, deflate, br" }
+                {"Accept-Encoding","gzip, deflate, br" },
+                {"x-requested-with","com.tencent.karaoke" }
             };
 
-            this.handler?.SaveStepTime(this.lotteryCode ?? string.Empty, this.getPlayTime(client, headers));
+            var playTime = this.getPlayTime(client, headers);
+            this.handler?.SaveStepTime(this.lotteryCode ?? string.Empty, playTime);
+
+            // 如果当前到了开奖时间则获取实时接口
+            //if (playTime.endTime < WebAgent.GetTimestamps())
+            //{
+            CollectData data = this.getPlayUserResult(client, playTime, headers);
+            if (data)
+            {
+                yield return data;
+            }
+            //}
 
             foreach (var item in this.getHistory(client, headers).ToArray())
             {
@@ -90,6 +110,7 @@ namespace BetWin.Game.Lottery.Collects
                 PostData = "{}"
             });
 
+
             if (!result) yield break;
 
             JObject info = JObject.Parse(result);
@@ -105,7 +126,7 @@ namespace BetWin.Game.Lottery.Collects
 
                 yield return new CollectData()
                 {
-                    Index = time.Value.ToString(),
+                    Index = WebAgent.GetTimestamps(time.Value).ToString("yyyyMMddHHmm"),
                     Number = number,
                     OpenTime = time.Value + 1000 * 60
                 };
@@ -127,14 +148,42 @@ namespace BetWin.Game.Lottery.Collects
                 PostData = "{}"
             });
 
-            if (!result) return default;
+            //Console.WriteLine($"getPlayTime => {result.Content}");
 
             JObject info = JObject.Parse(result);
 
             return new StepTimeModel(info["gameStartTime"]?.Value<long>() ?? 0,
                 info["gameResultTime"]?.Value<long>() ?? 0,
-                info["gameStartTime"]?.Value<string>());
+                WebAgent.GetTimestamps(info["gameStartTime"]?.Value<long>() ?? 0L).ToString("yyyyMMddHHmm"));
 
+        }
+
+        private CollectData getPlayUserResult(HttpClient client, StepTimeModel time, Dictionary<string, string> headers)
+        {
+            headers = JsonConvert.DeserializeObject<signSetting>(this.getPlayUserResultSetting)?.getHeaders(headers) ?? new Dictionary<string, string>();
+            HttpClientResponse result = client.Request(new HttpClientRequest()
+            {
+                Url = this.getPlayUserResultUrl,
+                Encoding = Encoding.UTF8,
+                Headers = headers,
+                Method = HttpMethod.Post,
+                PostData = "{}"
+            });
+
+            if (!result) return default;
+
+            //Console.WriteLine($"getPlayUserResult => {result.Content}");
+
+            JObject info = JObject.Parse(result);
+            string? winRole = info["winRole"]?.Value<string>();
+            if (winRole == null) return default;
+
+            return new CollectData()
+            {
+                Index = WebAgent.GetTimestamps(time.startTime).ToString("yyyyMMddHHmm"),
+                Number = winRole,
+                OpenTime = time.startTime + 1000 * 60
+            };
         }
 
         private string getHeaderKey(string key)
