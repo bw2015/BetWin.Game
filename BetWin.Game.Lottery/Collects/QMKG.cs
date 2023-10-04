@@ -60,9 +60,13 @@ namespace BetWin.Game.Lottery.Collects
         {
         }
 
+        private HttpClient client = new HttpClient()
+        {
+            Timeout = TimeSpan.FromSeconds(3)
+        };
+
         public override IEnumerable<CollectData> Execute()
         {
-            HttpClient client = new HttpClient();
             Dictionary<string, string> headers = new Dictionary<string, string>()
             {
                 {this.getHeaderKey(nameof(x_gopen_id)), this.x_gopen_id },
@@ -78,18 +82,22 @@ namespace BetWin.Game.Lottery.Collects
             this.handler?.SaveStepTime(this.lotteryCode ?? string.Empty, playTime);
 
             // 如果当前到了开奖时间则获取实时接口
-            //if (playTime.endTime < WebAgent.GetTimestamps())
-            //{
-            CollectData data = this.getPlayUserResult(client, playTime, headers);
-            if (data)
+            //Console.WriteLine($"{playTime.endTime} < {WebAgent.GetTimestamps()} => {playTime.endTime < WebAgent.GetTimestamps()}");
+            if (playTime.endTime < WebAgent.GetTimestamps())
             {
-                yield return data;
+                CollectData data = this.getPlayUserResult(client, playTime, headers);
+                if (data)
+                {
+                    //Console.WriteLine($"采集到数据 => {JsonConvert.SerializeObject(data)}");
+                    yield return data;
+                }
             }
-            //}
-
-            foreach (var item in this.getHistory(client, headers).ToArray())
+            else
             {
-                yield return item;
+                foreach (var item in this.getHistory(client, headers).ToArray())
+                {
+                    yield return item;
+                }
             }
         }
 
@@ -110,6 +118,7 @@ namespace BetWin.Game.Lottery.Collects
                 PostData = "{}"
             });
 
+            //Console.WriteLine($"getHistory => {result.Content}");
 
             if (!result) yield break;
 
@@ -152,8 +161,9 @@ namespace BetWin.Game.Lottery.Collects
 
             JObject info = JObject.Parse(result);
 
-            return new StepTimeModel(info["gameStartTime"]?.Value<long>() ?? 0,
-                info["gameResultTime"]?.Value<long>() ?? 0,
+            return new StepTimeModel(info["gameStartTime"]?.Value<long>() ?? 0L,
+                info["gameEndTime"]?.Value<long>() ?? 0L,
+                info["gameResultTime"]?.Value<long>() ?? 0L,
                 WebAgent.GetTimestamps(info["gameStartTime"]?.Value<long>() ?? 0L).ToString("yyyyMMddHHmm"));
 
         }
@@ -170,9 +180,10 @@ namespace BetWin.Game.Lottery.Collects
                 PostData = "{}"
             });
 
+            //Console.WriteLine($"getPlayUserResult => {result.Content}");
+
             if (!result) return default;
 
-            //Console.WriteLine($"getPlayUserResult => {result.Content}");
 
             JObject info = JObject.Parse(result);
             string? winRole = info["winRole"]?.Value<string>();

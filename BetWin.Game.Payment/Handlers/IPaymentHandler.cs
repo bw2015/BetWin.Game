@@ -19,9 +19,16 @@ namespace BetWin.Game.Payment.Handlers
         /// <returns>转换之后的币值</returns>
         public decimal Conversion(decimal amount, PaymentCurrency from, PaymentCurrency to);
 
+        /// <summary>
+        /// 获取支付供应商的代码
+        /// </summary>
+        public string GetProviderCode(int providerId, out string providerSetting);
 
-        public string GetProviderCode(int providerId);
-        
+        /// <summary>
+        /// 获取代付供应商的代码
+        /// </summary>
+        public string GetWithdrawCode(int providerId, out string providerSetting);
+
         /// <summary>
         /// 保存回调日志
         /// </summary>

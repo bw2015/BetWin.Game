@@ -29,7 +29,7 @@ namespace BetWin.Game.API.Requests
         /// <summary>
         /// 币种
         /// </summary>
-        public CurrencyType Currency { get; set; }
+        public GameCurrency Currency { get; set; }
 
         /// <summary>
         /// 语种

@@ -59,14 +59,14 @@ namespace BetWin.Game.API.Handlers
             {LanguageType.HI,"hi" },
         };
 
-        public override Dictionary<CurrencyType, string> Currencies => new Dictionary<CurrencyType, string>()
+        public override Dictionary<GameCurrency, string> Currencies => new Dictionary<GameCurrency, string>()
         {
-            { CurrencyType.CNY,"CNY" },
-            { CurrencyType.VND,"VND" },
-            { CurrencyType.USD,"USD" },
-            { CurrencyType.THB,"THB" },
-            { CurrencyType.IDR,"IDR" },
-            { CurrencyType.INR,"INR" },
+            { GameCurrency.CNY,"CNY" },
+            { GameCurrency.VND,"VND" },
+            { GameCurrency.USD,"USD" },
+            { GameCurrency.THB,"THB" },
+            { GameCurrency.IDR,"IDR" },
+            { GameCurrency.INR,"INR" },
         };
 
 

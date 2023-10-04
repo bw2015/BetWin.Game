@@ -45,7 +45,7 @@ namespace BetWin.Game.API.Handlers
 
         public override Dictionary<LanguageType, string> Languages => new Dictionary<LanguageType, string>();
 
-        public override Dictionary<CurrencyType, string> Currencies => new Dictionary<CurrencyType, string>();
+        public override Dictionary<GameCurrency, string> Currencies => new Dictionary<GameCurrency, string>();
 
         public override BalanceResponse Balance(BalanceModel request)
         {

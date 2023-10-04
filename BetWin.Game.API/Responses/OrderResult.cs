@@ -55,7 +55,7 @@ namespace BetWin.Game.API.Responses
         /// <summary>
         /// 币种
         /// </summary>
-        public CurrencyType? currency { get; set; }
+        public GameCurrency? currency { get; set; }
 
         /// <summary>
         /// 订单的下单时间

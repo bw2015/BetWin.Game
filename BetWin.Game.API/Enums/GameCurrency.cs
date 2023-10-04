@@ -6,9 +6,9 @@ using System.Text;
 namespace BetWin.Game.API.Enums
 {
     /// <summary>
-    /// 币种
+    /// 游戏的币种
     /// </summary>
-    public enum CurrencyType : byte
+    public enum GameCurrency : byte
     {
         [Description("人民币"), CurrencyExchange(1)]
         CNY = 0,

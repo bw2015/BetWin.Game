@@ -1,6 +1,8 @@
 ﻿using BetWin.Game.Payment.Handlers;
 using BetWin.Game.Payment.Providers;
+using BetWin.Game.Payment.Withdraws;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SP.StudioCore.Ioc;
 using System;
 using System.Collections.Generic;
@@ -16,9 +18,12 @@ namespace BetWin.Game.Payment
         internal static IPaymentHandler? handler => IocCollection.GetService<IPaymentHandler>();
 
 
-        public static IPaymentProvider? GetPaymentProvider(int provderId, string setting, string providerSetting = "{}")
+        #region ========  支付供应商  ========
+
+        public static IPaymentProvider? GetPaymentProvider(int provderId, string setting)
         {
-            string? providerCode = handler?.GetProviderCode(provderId);
+            string providerSetting = string.Empty;
+            string? providerCode = handler?.GetProviderCode(provderId, out providerSetting);
             if (providerCode == null) return null;
             return GetPaymentProvider(providerCode, setting, providerSetting);
         }
@@ -55,5 +60,46 @@ namespace BetWin.Game.Payment
             var assembly = typeof(PaymentProviderBase).Assembly;
             return assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(PaymentProviderBase)) && !t.IsAbstract);
         }
+
+        #endregion
+
+        #region ========  代付供应商  ========
+
+        /// <summary>
+        /// 获取系统中所有定义的代付供应商
+        /// </summary>
+        public static IEnumerable<Type> GetWithdrawProviders()
+        {
+            var assembly = typeof(PaymentProviderBase).Assembly;
+            return assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(WithdrawProviderBase)) && !t.IsAbstract);
+        }
+
+        public static IWithdrawProvider? GetWithdrawProvider(int providerId, string setting)
+        {
+            string providerSetting = string.Empty;
+            string? code = handler?.GetWithdrawCode(providerId, out providerSetting);
+            if (string.IsNullOrEmpty(code)) return null;
+            return GetWithdrawProvider(code, setting, providerSetting);
+        }
+
+        public static IWithdrawProvider? GetWithdrawProvider(string provider, string setting, string providerSetting = "{}")
+        {
+            Assembly assembly = typeof(PaymentFactory).Assembly;
+            Type type = assembly.GetType($"{typeof(IWithdrawProvider).Namespace}.{provider}");
+            if (type == null) return null;
+
+            JObject settingValue = string.IsNullOrEmpty(setting) ? new JObject() : JObject.Parse(setting);
+            if (!string.IsNullOrEmpty(providerSetting) && providerSetting.StartsWith("{"))
+            {
+                settingValue.Merge(JObject.Parse(providerSetting));
+            }
+
+            return (IWithdrawProvider)Activator.CreateInstance(type, new[] { settingValue.ToString() });
+        }
+
+
+        #endregion
+
+
     }
 }

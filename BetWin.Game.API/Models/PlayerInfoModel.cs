@@ -20,6 +20,6 @@ namespace BetWin.Game.API.Models
         /// <summary>
         /// 币种
         /// </summary>
-        public CurrencyType currency { get; set; }
+        public GameCurrency currency { get; set; }
     }
 }

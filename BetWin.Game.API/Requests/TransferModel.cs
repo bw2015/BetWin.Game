@@ -14,7 +14,7 @@ namespace BetWin.Game.API.Requests
         /// <summary>
         /// 币种
         /// </summary>
-        public CurrencyType Currency { get; set; }
+        public GameCurrency Currency { get; set; }
 
         /// <summary>
         /// 转账金额（转入为正数/转出为负数）
