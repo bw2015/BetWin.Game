@@ -43,7 +43,7 @@ namespace BetWin.Game.Lottery.Collects
                 string? number = item["poolId"]?.Value<string>();
                 if (string.IsNullOrEmpty(number)) continue;
 
-                yield return new CollectData(openTime.ToString("yyyyMMddHHmm"), number, time.Value);
+                yield return new CollectData(openTime.ToString("yyyyMMddHHmm"), number, time.Value + 60 * 1000);
             }
         }
     }
