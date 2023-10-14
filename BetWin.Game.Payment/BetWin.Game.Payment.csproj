@@ -16,4 +16,12 @@
     <ProjectReference Include="..\..\SP.Studio\SP.StudioCore.Net.Http\SP.StudioCore.Net.Http.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="E:\wwwroot\BetWin.Game\BetWin.Game.Payment\Providers\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="E:\wwwroot\BetWin.Game\BetWin.Game.Payment\Providers\.editorconfig" />
+  </ItemGroup>
+
 </Project>

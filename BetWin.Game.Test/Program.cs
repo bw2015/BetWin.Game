@@ -21,7 +21,7 @@ namespace BetWin.Game.Test
             Console.ReadKey();
             //new Tests().InMoneyTest();
 
-            var response = new JIFuYun("{}")
+            var response = new PayCloud("{}")
             {
                 gateway = "https://api.a8.to/jump/?http://115.126.121.25:6005",
                 appId = "178",

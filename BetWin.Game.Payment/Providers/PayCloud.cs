@@ -19,7 +19,7 @@ using static System.Net.Mime.MediaTypeNames;
 namespace BetWin.Game.Payment.Providers
 {
     [Description("极付云")]
-    public class JIFuYun : PaymentProviderBase
+    public class PayCloud : PaymentProviderBase
     {
         [Description("网关")]
         public string gateway { get; set; } = "http://115.126.121.25:6005";
@@ -42,7 +42,7 @@ namespace BetWin.Game.Payment.Providers
         [Description("渠道编号")]
         public string ditchId { get; set; }
 
-        public JIFuYun(string setting) : base(setting)
+        public PayCloud(string setting) : base(setting)
         {
         }
 
@@ -83,12 +83,12 @@ namespace BetWin.Game.Payment.Providers
             };
         }
 
-        protected override PaymentResponse payment(PaymentRequest request, out string postData, out HttpClientResponse result)
+        protected override PaymentResponse payment(PaymentRequest request, out string url, out string postData, out HttpClientResponse result)
         {
             string netPublicKey = new RsaHelper().RSAPublicKeyJava2DotNet(this.publicKey);
             RsaHelper rsaHelper = new RsaHelper(netPublicKey, null, false);
 
-            string url = $"{this.gateway}/api/Order/InMoneyOrder";
+            url = $"{this.gateway}/api/Order/InMoneyOrder";
 
             Dictionary<string, string> pairs = new Dictionary<string, string>()
             {
@@ -107,7 +107,7 @@ namespace BetWin.Game.Payment.Providers
                         sum = (int)(request.amount * 100M),
                         this.merchantId,
                         this.ditchId,
-                        name = nameof(JIFuYun),
+                        name = nameof(PayCloud),
                         userId = request.username,
                         userlevel = 6,
                         usePayType = 3,

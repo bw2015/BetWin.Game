@@ -50,7 +50,7 @@ namespace BetWin.Game.Payment.Models
 
         public static implicit operator bool(PaymentResponse response)
         {
-            return !string.IsNullOrEmpty(response.url);
+            return !string.IsNullOrEmpty(response?.url);
         }
     }
 }

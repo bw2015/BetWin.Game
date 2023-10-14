@@ -17,7 +17,7 @@ namespace BetWin.Game.Payment.Withdraws
             JsonConvert.PopulateObject(setting, this);
         }
 
-        public abstract WithdrawResponse Query(WithdrawRequest request);
+        public abstract WithdrawQueryResponse Query(WithdrawQuery request);
 
         public abstract WithdrawResponse Withdraw(WithdrawRequest request);
 

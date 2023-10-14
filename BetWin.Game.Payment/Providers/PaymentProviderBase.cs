@@ -1,5 +1,6 @@
 ﻿using BetWin.Game.Payment.Exceptions;
 using BetWin.Game.Payment.Handlers;
+using BetWin.Game.Payment.Logs;
 using BetWin.Game.Payment.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,22 +26,30 @@ namespace BetWin.Game.Payment.Providers
         protected IPaymentHandler? handler
             => IocCollection.GetService<IPaymentHandler>();
 
-        protected abstract PaymentResponse payment(PaymentRequest request, out string postData, out HttpClientResponse result);
+        protected abstract PaymentResponse payment(PaymentRequest request, out string url, out string postData, out HttpClientResponse result);
 
         public PaymentResponse Payment(PaymentRequest request)
         {
             PaymentResponse? response = default;
             string postData = string.Empty;
             HttpClientResponse result = default;
+            string url = string.Empty;
             try
             {
-                response = this.payment(request, out postData, out result);
+                response = this.payment(request, out url, out postData, out result);
             }
             finally
             {
                 if (response != null)
                 {
-                    this.handler?.SaveLog(this.GetType(), request, response, postData, result);
+                    this.handler?.SaveLog(new PaymentLog()
+                    {
+                        OrderId = request.orderId ?? string.Empty,
+                        Provider = this.GetType().Name,
+                        Request = postData,
+                        Response = result,
+                        Url = url
+                    });
                 }
             }
             return response;

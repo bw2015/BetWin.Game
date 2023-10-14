@@ -22,10 +22,11 @@ namespace BetWin.Game.Payment.Providers
             throw new NotImplementedException();
         }
 
-        protected override PaymentResponse payment(PaymentRequest request, out string postData, out HttpClientResponse result)
+        protected override PaymentResponse payment(PaymentRequest request, out string url, out string postData, out HttpClientResponse result)
         {
             postData = string.Empty;
             result = default;
+            url = string.Empty;
             return new PaymentResponse
             {
                 createTime = WebAgent.GetTimestamps(),

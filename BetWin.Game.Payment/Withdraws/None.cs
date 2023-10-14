@@ -25,14 +25,13 @@ namespace BetWin.Game.Payment.Withdraws
             };
         }
 
-        public override WithdrawResponse Query(WithdrawRequest request)
+        public override WithdrawQueryResponse Query(WithdrawQuery request)
         {
-            return new WithdrawResponse()
+            return new WithdrawQueryResponse()
             {
-                orderId = request.orderId,                 
-                currency = request.currency,
-                amount = request.amount,
-                status = WithdrawProviderStatus.PaymentSuccess
+                OrderID = request.orderId,
+                TradeNo = request.tradeNo,
+                Status = WithdrawProviderStatus.PaymentSuccess
             };
         }
     }

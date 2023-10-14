@@ -1,4 +1,5 @@
 ﻿using BetWin.Game.Payment.Enums;
+using BetWin.Game.Payment.Logs;
 using BetWin.Game.Payment.Models;
 using Microsoft.AspNetCore.Http;
 using SP.StudioCore.Net.Http;
@@ -25,11 +26,6 @@ namespace BetWin.Game.Payment.Handlers
         public string GetProviderCode(int providerId, out string providerSetting);
 
         /// <summary>
-        /// 获取代付供应商的代码
-        /// </summary>
-        public string GetWithdrawCode(int providerId, out string providerSetting);
-
-        /// <summary>
         /// 保存回调日志
         /// </summary>
         void SaveCallback(CallbackResponse response, HttpContext context);
@@ -44,7 +40,7 @@ namespace BetWin.Game.Payment.Handlers
         /// <summary>
         /// 保存请求的Log
         /// </summary>
-        void SaveLog(Type type, PaymentRequest request, PaymentResponse response, string httpRequest, HttpClientResponse httpResponse);
+        void SaveLog(PaymentLog log);
 
     }
 }

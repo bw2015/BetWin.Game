@@ -33,10 +33,10 @@ namespace BetWin.Game.Payment.Providers
             return default;
         }
 
-        protected override PaymentResponse payment(PaymentRequest request, out string postData, out HttpClientResponse result)
+        protected override PaymentResponse payment(PaymentRequest request, out string url, out string postData, out HttpClientResponse result)
         {
-            postData = string.Empty;
-            result = default;
+            postData = JsonConvert.SerializeObject(request);
+            url = this.Gateway;
             if (this.handler == null) throw new PaymentException(PaymentError.NoPaymentHandler);
             //#1 汇率转换
             decimal? amount = this.handler.Conversion(request.amount, request.currency, PaymentCurrency.USDT);
@@ -54,6 +54,14 @@ namespace BetWin.Game.Payment.Providers
                 orderId = request.orderId,
                 url = $"{this.Gateway}?orderId={request.orderId}"
             };
+
+            result = new HttpClientResponse()
+            {
+                StatusCode = System.Net.HttpStatusCode.OK,
+                Content = JsonConvert.SerializeObject(response)
+            };
+
+
 
             //#2 写入订单（同时判断金额是否被锁定）
             if (!this.handler.SaveChainOrder(response)) throw new PaymentException(PaymentError.AmountLocked);

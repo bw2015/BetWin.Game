@@ -18,6 +18,6 @@ namespace BetWin.Game.Payment.Withdraws
         /// <summary>
         /// 查询提现状态
         /// </summary>
-        public WithdrawResponse Query(WithdrawRequest request);
+        public WithdrawQueryResponse Query(WithdrawQuery request);
     }
 }

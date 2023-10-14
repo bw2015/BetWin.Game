@@ -9,6 +9,9 @@ namespace BetWin.Game.Payment.Enums
     /// </summary>
     public enum WithdrawProviderStatus : byte
     {
+        /// <summary>
+        /// 不需要变更状态
+        /// </summary>
         None = 0,
         /// <summary>
         /// 提交成功
