@@ -161,6 +161,11 @@ namespace BetWin.Game.API.Enums
         [Description("系统繁忙")]
         SystemBuzy = 2001,
         /// <summary>
+        /// 不支持该方法
+        /// </summary>
+        [Description("不支持该方法")]
+        NotSupport = 9997,
+        /// <summary>
         /// 系统维护中
         /// </summary>
         [Description("系统维护中")]
@@ -169,6 +174,6 @@ namespace BetWin.Game.API.Enums
         /// 系统错误
         /// </summary>
         [Description("系统错误")]
-        Exception = 9999
+        Exception = 9999,
     }
 }

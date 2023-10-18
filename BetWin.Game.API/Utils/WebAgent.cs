@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace BetWin.Game.API.Utils
 {
@@ -19,6 +20,25 @@ namespace BetWin.Game.API.Utils
         public static DateTime GetTimestamps(long timestamp)
         {
             return new DateTime(1970, 1, 1).Add(TimeZoneInfo.Local.BaseUtcOffset).AddMilliseconds(timestamp);
+        }
+
+        /// <summary>
+        /// IPV4 转long
+        /// </summary>
+        /// <param name="ipV4"></param>
+        /// <returns></returns>
+        public static int ConvertIPv4(string ipV4)
+        {
+            if (!Regex.IsMatch(ipV4, @"^\d+\.\d+\.\d+\.\d+\$")) return 0;
+            int ip = 0;
+            string[] split = ipV4.Split('.');
+            for (int i = 0; i < split.Length; i++)
+            {
+                string s = split[split.Length - i - 1];
+                int x = int.Parse(s) << i * 8;
+                ip |= x;
+            }
+            return ip;
         }
     }
 }

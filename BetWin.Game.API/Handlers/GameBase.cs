@@ -13,7 +13,7 @@ namespace BetWin.Game.API.Handlers
 {
     public interface IGameHandler
     {
-        public Dictionary<LanguageType, string> Languages { get; }
+        public Dictionary<GameLanguage, string> Languages { get; }
 
         public Dictionary<GameCurrency, string> Currencies { get; }
 
@@ -71,7 +71,7 @@ namespace BetWin.Game.API.Handlers
         /// <summary>
         /// 当前线路所支持的语种
         /// </summary>
-        public abstract Dictionary<LanguageType, string> Languages { get; }
+        public abstract Dictionary<GameLanguage, string> Languages { get; }
 
         /// <summary>
         /// 线路所支持的币种
@@ -205,6 +205,26 @@ namespace BetWin.Game.API.Handlers
         protected abstract GameResultCode GetResultCode(string result, out string message);
 
         internal abstract HttpResult RequestAPI(GameRequest request);
+
+        /// <summary>
+        /// 用户名之间的分隔符
+        /// </summary>
+        protected virtual char UserNameSplit => '_';
+
+        protected virtual string CreateUserName(string prefix, string userName, int maxLength, int tryCount = 0)
+        {
+            string name;
+            if (tryCount == 0)
+            {
+                name = $"{prefix}{this.UserNameSplit}{userName}";
+            }
+            else
+            {
+                name = $"{prefix}{this.UserNameSplit}{userName}{this.UserNameSplit}{tryCount}";
+            }
+            if (name.Length > maxLength) name = $"{prefix}{this.UserNameSplit}{Guid.NewGuid().ToString("N")[..(maxLength - prefix.Length - 1)]}";
+            return name;
+        }
 
         [Obsolete("临时方法")]
         public object ToSettingObject()

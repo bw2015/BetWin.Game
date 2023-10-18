@@ -16,13 +16,13 @@ namespace BetWin.Game.API.Responses
         {
         }
 
-        public string Url { get; set; }
+        public string? Url { get; set; }
 
         public LoginMethod Method { get; set; }
 
         /// <summary>
         /// 如果登录方式是Post需要携带的数据
         /// </summary>
-        public Dictionary<string, object> Data { get; set; }
+        public Dictionary<string, object>? Data { get; set; }
     }
 }

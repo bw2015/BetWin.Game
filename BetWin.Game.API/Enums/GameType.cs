@@ -13,6 +13,9 @@ namespace BetWin.Game.API.Enums
         SALive,
 
         [Description("VR彩票")]
-        VRLottery = 20
+        VRLottery = 20,
+
+        [Description("OB电竞")]
+        OBESport = 40,
     }
 }

@@ -22,6 +22,6 @@ namespace BetWin.Game.API.Responses
         /// <summary>
         /// 错误代码
         /// </summary>
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 }

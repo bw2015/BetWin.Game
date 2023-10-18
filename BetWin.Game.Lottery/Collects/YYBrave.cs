@@ -20,21 +20,7 @@ namespace BetWin.Game.Lottery.Collects
         {
         }
 
-        static HttpClient _client;
-
-        static HttpClient client
-        {
-            get
-            {
-                if (_client == null)
-                {
-                    _client = new HttpClient();
-                }
-                return _client;
-            }
-        }
-
-        string getNumber(string winName)
+        string getNumber(string? winName)
         {
             return winName switch
             {
@@ -49,21 +35,25 @@ namespace BetWin.Game.Lottery.Collects
 
         public override IEnumerable<CollectData> Execute()
         {
-            HttpClientResponse result = client.Get(url, new Dictionary<string, string>()
+            using (HttpClient client = new HttpClient())
             {
-
-            });
-            if (!result) yield break;
-
-            response? res = JsonConvert.DeserializeObject<response>(result.Content);
-            foreach (var item in res?.wininfo ?? Array.Empty<winner>())
-            {
-                yield return new CollectData()
+                client.Timeout = TimeSpan.FromSeconds(10);
+                HttpClientResponse result = client.Get(url, new Dictionary<string, string>()
                 {
-                    Index = item.bizTime.ToString("yyyyMMddHHmm"),
-                    Number = this.getNumber(item.winName),
-                    OpenTime = WebAgent.GetTimestamps(item.bizTime)
-                };
+
+                });
+                if (!result) yield break;
+
+                response? res = JsonConvert.DeserializeObject<response>(result.Content);
+                foreach (var item in res?.wininfo ?? Array.Empty<winner>())
+                {
+                    yield return new CollectData()
+                    {
+                        Index = item.bizTime.ToString("yyyyMMddHHmm"),
+                        Number = this.getNumber(item.winName),
+                        OpenTime = WebAgent.GetTimestamps(item.bizTime)
+                    };
+                }
             }
         }
 

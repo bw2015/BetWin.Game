@@ -49,14 +49,14 @@ namespace BetWin.Game.API.Handlers
 
         #endregion        
 
-        public override Dictionary<LanguageType, string> Languages => new Dictionary<LanguageType, string>()
+        public override Dictionary<GameLanguage, string> Languages => new Dictionary<GameLanguage, string>()
         {
-            {LanguageType.CHN,"zh" },
-            {LanguageType.ENG,"en" },
-            {LanguageType.VI,"vi" },
-            {LanguageType.TH,"th" },
-            {LanguageType.IND,"id" },
-            {LanguageType.HI,"hi" },
+            {GameLanguage.CHN,"zh" },
+            {GameLanguage.ENG,"en" },
+            {GameLanguage.VI,"vi" },
+            {GameLanguage.TH,"th" },
+            {GameLanguage.IND,"id" },
+            {GameLanguage.HI,"hi" },
         };
 
         public override Dictionary<GameCurrency, string> Currencies => new Dictionary<GameCurrency, string>()

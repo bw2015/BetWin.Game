@@ -24,7 +24,7 @@ namespace BetWin.Game.API.Models
         /// <summary>
         /// 请求数据
         /// </summary>
-        public object Data;
+        public string Data;
 
         /// <summary>
         /// 请求的参数

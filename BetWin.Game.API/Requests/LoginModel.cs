@@ -24,7 +24,7 @@ namespace BetWin.Game.API.Requests
         /// <summary>
         /// 平台类型
         /// </summary>
-        public PlatformType Platform { get; set; }
+        public GamePlatform Platform { get; set; }
 
         /// <summary>
         /// 币种
@@ -34,7 +34,7 @@ namespace BetWin.Game.API.Requests
         /// <summary>
         /// 语种
         /// </summary>
-        public LanguageType Language { get; set; }
+        public GameLanguage Language { get; set; }
 
         /// <summary>
         /// 要进入的游戏代码

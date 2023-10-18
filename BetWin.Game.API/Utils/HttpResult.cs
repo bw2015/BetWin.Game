@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Net;
 using System.Text;
+using SP.StudioCore.Net.Http;
 
 namespace BetWin.Game.API.Utils
 {
@@ -57,6 +58,16 @@ namespace BetWin.Game.API.Utils
         public static implicit operator string(HttpResult result)
         {
             return result.Content;
+        }
+
+        public static implicit operator HttpResult(HttpClientResponse response)
+        {
+            return new HttpResult()
+            {
+                StatusCode = response.StatusCode,
+                Content = response.Content,
+                Headers = response.Headers
+            };
         }
     }
 }

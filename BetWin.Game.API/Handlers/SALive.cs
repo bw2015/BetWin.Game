@@ -54,19 +54,19 @@ namespace BetWin.Game.API.Handlers
         {
         }
 
-        public override Dictionary<LanguageType, string> Languages => new Dictionary<LanguageType, string>()
+        public override Dictionary<GameLanguage, string> Languages => new Dictionary<GameLanguage, string>()
         {
-            {LanguageType.ENG,"en_US" },
-            {LanguageType.ES,"es" },
-            {LanguageType.HI,"hi" },
-            {LanguageType.IND,"id" },
-            {LanguageType.JA,"jp" },
-            {LanguageType.PT,"pt" },
-            {LanguageType.MY,"ms" },
-            {LanguageType.TH,"th" },
-            {LanguageType.VI,"vn" },
-            {LanguageType.CHN,"zh_CN" },
-            {LanguageType.THN,"zh_TW" }
+            {GameLanguage.ENG,"en_US" },
+            {GameLanguage.ES,"es" },
+            {GameLanguage.HI,"hi" },
+            {GameLanguage.IND,"id" },
+            {GameLanguage.JA,"jp" },
+            {GameLanguage.PT,"pt" },
+            {GameLanguage.MY,"ms" },
+            {GameLanguage.TH,"th" },
+            {GameLanguage.VI,"vn" },
+            {GameLanguage.CHN,"zh_CN" },
+            {GameLanguage.THN,"zh_TW" }
         };
 
         public override Dictionary<GameCurrency, string> Currencies => new Dictionary<GameCurrency, string>()
@@ -163,7 +163,7 @@ namespace BetWin.Game.API.Handlers
             var response = this.Request(new GameRequest()
             {
                 Method = APIMethod.Balance,
-                Data = data
+                Data = this.GetData(data)
             });
             if (response != GameResultCode.Success)
             {
@@ -190,7 +190,7 @@ namespace BetWin.Game.API.Handlers
 
             var response = this.Request(new GameRequest()
             {
-                Data = data
+                Data = this.GetData(data)
             });
             if (response != GameResultCode.Success)
             {
@@ -227,7 +227,7 @@ namespace BetWin.Game.API.Handlers
             var response = this.Request(new GameRequest()
             {
                 Method = APIMethod.GetOrder,
-                Data = data
+                Data = this.GetData(data)
             });
 
             if (response != GameResultCode.Success)
@@ -296,7 +296,7 @@ namespace BetWin.Game.API.Handlers
             var response = this.Request(new GameRequest()
             {
                 Method = APIMethod.Login,
-                Data = data
+                Data = this.GetData(data)
             });
             string? token = null;
             if (response == GameResultCode.Success)
@@ -328,7 +328,7 @@ namespace BetWin.Game.API.Handlers
             var response = this.Request(new GameRequest
             {
                 Method = APIMethod.Register,
-                Data = data
+                Data = this.GetData(data)
             });
 
             string? playerName = null;
@@ -367,7 +367,7 @@ namespace BetWin.Game.API.Handlers
             var response = this.Request(new GameRequest()
             {
                 Method = APIMethod.Transfer,
-                Data = data
+                Data = this.GetData(data)
             });
             if (response != GameResultCode.Success && response != GameResultCode.Exception)
             {
@@ -453,18 +453,7 @@ namespace BetWin.Game.API.Handlers
 
         internal override HttpResult RequestAPI(GameRequest request)
         {
-            Dictionary<string, string>? data = (Dictionary<string, string>)request.Data;
-            if (data == null) return new HttpResult(new Exception("参数错误"), this.gateway);
-
-            string time = DateTime.Now.ToString("yyyyMMddHHmmss");
-            data.Add("Key", this.secretkey);
-            data.Add("Time", time);
-
-            string qs = data.ToQueryString();
-            string q = HttpUtility.UrlEncode(this.DESEncrypt(qs));
-            string s = this.BuildMD5($"{qs}{this.md5Key}{time}{this.secretkey}");
-
-            return NetAgent.PostAsync(this.gateway, $"q={q}&s={s}", Encoding.UTF8).Result;
+            return NetAgent.PostAsync(this.gateway, request.Data, Encoding.UTF8).Result;
         }
 
         #region ========  工具方法  ========
@@ -484,7 +473,7 @@ namespace BetWin.Game.API.Handlers
             return Convert.ToBase64String(ms.GetBuffer(), 0, (int)ms.Length);
         }
 
-        public string BuildMD5(string inString)
+        private string BuildMD5(string inString)
         {
             byte[] hashed = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(inString));
             StringBuilder sb = new StringBuilder(hashed.Length * 2);
@@ -493,6 +482,17 @@ namespace BetWin.Game.API.Handlers
                 sb.Append(hashed[i].ToString("x2"));
             }
             return sb.ToString();
+        }
+
+        private string GetData(Dictionary<string, string> data)
+        {
+            string time = DateTime.Now.ToString("yyyyMMddHHmmss");
+            data.Add("Key", this.secretkey);
+            data.Add("Time", time);
+            string qs = data.ToQueryString();
+            string q = HttpUtility.UrlEncode(this.DESEncrypt(qs));
+            string s = this.BuildMD5($"{qs}{this.md5Key}{time}{this.secretkey}");
+            return $"q={q}&s={s}";
         }
 
         #endregion

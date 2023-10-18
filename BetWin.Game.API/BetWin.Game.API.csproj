@@ -30,4 +30,8 @@
     <PackageReference Include="SP.StudioCore.Ioc" Version="1.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\SP.Studio\SP.StudioCore.Net.Http\SP.StudioCore.Net.Http.csproj" />
+  </ItemGroup>
+
 </Project>

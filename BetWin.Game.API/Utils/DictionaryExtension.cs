@@ -24,9 +24,11 @@ namespace BetWin.Game.API.Utils
         /// 转化成为QueryString格式
         /// </summary>
         /// <param name="urlEncode">Value内容是否使用Url编码</param>
-        public static string ToQueryString<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, bool urlEncode = false)
+        public static string ToQueryString<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> dictionary, bool urlEncode = false)
         {
-            return string.Join("&", dictionary.Select(t => $"{t.Key}={(urlEncode ? HttpUtility.UrlEncode(t.Value.ToString()) : t.Value?.ToString())}"));
+            return string.Join("&", dictionary.Select(t => $"{t.Key}={(urlEncode ? HttpUtility.UrlEncode(t.Value == null ? string.Empty : t.Value.ToString()) : t.Value?.ToString())}"));
         }
+
+
     }
 }
