@@ -4,7 +4,13 @@ using BetWin.Game.API.Handlers;
 using BetWin.Game.API.Requests;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using SP.StudioCore.Data;
+using SP.StudioCore.Enums;
 using SP.StudioCore.Mvc;
+using SP.StudioCore.Types;
+using System.ComponentModel;
+using System.Reflection;
+using System.Xml.Linq;
 
 namespace BetWin.Game.Test
 {
@@ -21,6 +27,63 @@ namespace BetWin.Game.Test
             return handler;
         }
 
+        /// <summary>
+        /// 获取所有的游戏类型
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult GetGames()
+        {
+            Dictionary<GameType, string> games = new Dictionary<GameType, string>();
+            foreach (GameType game in Enum.GetValues<GameType>())
+            {
+                games.Add(game, game.GetDescription());
+            }
+            return new JsonResult(games);
+        }
+
+        /// <summary>
+        /// 获取配置参数
+        /// </summary>
+        public IActionResult getSetting([FromForm] GameType game)
+        {
+            var handler = this.GetHandler(game, "{}");
+            var list = new List<object>();
+            if (handler == null) return new JsonResult(list);
+
+            foreach (PropertyInfo property in handler.GetType().GetProperties())
+            {
+                if (!property.CanWrite) continue;
+                string name = property.Name;
+                string description = property.GetAttribute<DescriptionAttribute>()?.Description ?? name;
+                string value = property.GetValue(handler)?.ToString() ?? string.Empty;
+
+                list.Add(new
+                {
+                    name,
+                    description,
+                    value
+                });
+            }
+
+            return new JsonResult(list);
+        }
+
+        /// <summary>
+        /// 获取参数配置
+        /// </summary>
+        public IActionResult getModel([FromForm] string model)
+        {
+            Assembly assembly = typeof(GameFactory).Assembly;
+            Type? type = assembly.GetType($"BetWin.Game.API.Requests.{model}");
+            if (type == null) return new NotFoundResult();
+            var list = new List<string>();
+            foreach (PropertyInfo property in type.GetProperties())
+            {
+                if (!property.CanWrite) continue;
+                list.Add(property.Name);
+            }
+            return new JsonResult(list);
+        }
 
         /// <summary>
         /// 登录请求

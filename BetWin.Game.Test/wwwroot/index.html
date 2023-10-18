@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>BetWin.Game 在线测试</title>
+    <script src="//studio.a8.to/lay/ui/layui.js"></script>
+    <link rel="stylesheet" href="//studio.a8.to/lay/ui/css/layui.css" media="all">
+    <link rel="stylesheet" href="//studio.a8.to/lay/ui/css/layui.extend.css" media="all">
+    <link href="//studio.a8.to/css/icon.css" rel="stylesheet" />
+    <base href="http://localhost:5000" />
+    <style type="text/css">
+        body { max-width: 720px; margin: auto; }
+        .layui-btn.current { background-color: #1E9FFF; color: #fff; }
+    </style>
+</head>
+<body>
+    <fieldset>
+        <legend>选择游戏</legend>
+        <form class="layui-form" lay-filter="game">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <div class="layui-form-label">
+                        接口：
+                    </div>
+                    <div class="layui-input-inline">
+                        <select name="game" id="game"></select>
+                    </div>
+                </div>
+            </div>
+            <div id="game-setting"></div>
+            <div class="layui-form-item layui-text-center">
+                <button class="layui-btn am-icon-save"> 保存游戏接口配置</button>
+            </div>
+        </form>
+    </fieldset>
+    <hr />
+    <fieldset>
+        <legend>
+            <label class="layui-btn-group" id="method">
+
+            </label>
+        </legend>
+        <div class="layui-form">
+            <hr />
+            <div class="layui-form-item" id="model"></div>
+            <div class="layui-form-item layui-text-center">
+                <button class="layui-btn layui-btn-normal am-icon-send"> 发起请求</button>
+            </div>
+        </div>
+    </fieldset>
+
+    <script type="text/javascript">
+        layui.use(["form"], () => {
+            const form = layui.form,
+                $ = layui.$,
+                method = {
+                    "LoginModel": "登录",
+                    "RegisterModel": "注册",
+                    "LogoutModel": "登出",
+                    "BalanceModel": "余额查询",
+                    "TransferModel": "转账",
+                    "CheckTransferModel": "转账检查",
+                    "QueryOrderModel": "订单查询"
+                },
+                loadGame = () => {
+                    var data = form.val("game");
+                    $.post("/game/getSetting", data, res => {
+                        let html = [];
+                        res.forEach(item => {
+                            html.push(`<div class="layui-form-item">
+                                                                <label class="layui-form-label">${item.description}</label>
+                                                                <div class="layui-input-block"><input type="text" class="layui-input" name="${item.name}" value="${item.value}" /></div>
+                                                                </div>`);
+                        });
+                        document.getElementById("game-setting").innerHTML = html.join("");
+                    });
+                },
+                loadModel = model => {
+                    $.post("/game/getModel", {
+                        model
+                    }, res => {
+                        let html = [];
+                        res.forEach(name => {
+                            html.push(`<div class="layui-inline">
+                                          <label class="layui-form-label">${name}</label>
+                                          <div class="layui-input-block"><input type="text" class="layui-input" name="${name}" /></div>
+                                          </div>`);
+                        });
+                        document.getElementById("model").innerHTML = html.join("");
+                    });
+                };
+
+            !function () {
+                let html = [];
+                let elem = document.getElementById("method");
+                Object.keys(method).forEach(key => {
+                    html.push(`<button class="layui-btn layui-btn-primary layui-btn-sm" data-method="${key}">${method[key]}</button>`)
+                });
+                elem.innerHTML = html.join("");
+                $(elem).on("click", "[data-method]", e => {
+                    let btn = elem.querySelector(".current");
+                    if (btn) btn.classList.remove("current");
+
+                    btn = e.target;
+                    let model = btn.getAttribute("data-method");
+                    btn.classList.add("current");
+
+                    loadModel(model);
+                });
+            }();
+
+            loadModel("LoginModel");
+
+            // 加载游戏类型
+            $.post("/game/getGames", null, res => {
+                Object.keys(res).forEach(type => {
+                    document.getElementById("game").options.add(new Option(res[type], type));
+                });
+                form.render(null, "game");
+                form.on("select", loadGame);
+                loadGame();
+            })
+        })
+    </script>
+</body>
+</html>

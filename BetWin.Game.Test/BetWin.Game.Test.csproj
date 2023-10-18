@@ -11,8 +11,4 @@
     <ProjectReference Include="..\BetWin.Game.API\BetWin.Game.API.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
 </Project>
