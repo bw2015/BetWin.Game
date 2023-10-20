@@ -99,7 +99,33 @@ namespace BetWin.Game.API.Handlers
 
         public override CheckTransferResponse CheckTransfer(CheckTransferModel request)
         {
-            throw new NotImplementedException();
+            Dictionary<string, object> data = new Dictionary<string, object>
+            {
+                {"merOrderId",request.OrderID },
+                {"merchant",this.merchant },
+                {"time",WebAgent.GetTimestamps()/1000L },
+            };
+            data["sign"] = GetSign(data);
+            string result = this.Post<response<string>>(APIMethod.CheckTransfer, "/api/fund/transferQuery", data, out GameResultCode code);
+            if (code != GameResultCode.Success)
+            {
+                return new CheckTransferResponse(code)
+                {
+                    Status = code == GameResultCode.Exception ? GameAPITransferStatus.Unknow : GameAPITransferStatus.Faild
+                };
+            }
+            JObject obj = JObject.Parse(result);
+            int status = obj.Value<int>("data");
+            return new CheckTransferResponse(code)
+            {
+                Money = 0,
+                Status = status switch
+                {
+                    3 => GameAPITransferStatus.Success,
+                    2 => GameAPITransferStatus.Faild,
+                    _ => GameAPITransferStatus.Unknow
+                }
+            };
         }
 
         public override OrderResult GetOrder(QueryOrderModel request)
@@ -166,7 +192,43 @@ namespace BetWin.Game.API.Handlers
 
         public override TransferResponse Transfer(TransferModel request)
         {
-            throw new NotImplementedException();
+            string transferId = DateTime.Now.ToString("yyyyMMddHHmmss") + (WebAgent.GetTimestamps() % 1000000L).ToString().PadLeft(6, '0');
+            Dictionary<string, object> data = new Dictionary<string, object>
+            {
+                {"amount",Math.Abs(request.Money) },
+                {"key",this.secret_key },
+                // 这里的原因，导致不能用OrderBy排序
+                {"merOrderId",transferId },
+                {"merchant",this.merchant },
+                {"time",WebAgent.GetTimestamps() / 1000L },
+                {"type",request.Money>0?1:2 },
+                {"username",request.PlayerName },
+            };
+            data["sign"] = data.ToQueryString().toMD5().ToLower();
+            data.Remove("key");
+
+            string result = this.Post<response<string>>(APIMethod.Transfer, "/api/fund/transfer", data, out GameResultCode code);
+
+            if (code != GameResultCode.Success)
+            {
+                return new TransferResponse(code)
+                {
+                    OrderID = request.OrderID,
+                    TransferID = transferId,
+                    Money = request.Money,
+                    Currency = request.Currency,
+                    Status = code == GameResultCode.Exception ? GameAPITransferStatus.Unknow : GameAPITransferStatus.Faild
+                };
+            }
+
+            return new TransferResponse(code)
+            {
+                Money = Math.Abs(request.Money),
+                OrderID = request.OrderID,
+                TransferID = transferId,
+                PlayerName = request.PlayerName,
+                Status = GameAPITransferStatus.Success
+            };
         }
 
         protected override GameResultCode GetResultCode(string result, out string message)
@@ -271,7 +333,7 @@ namespace BetWin.Game.API.Handlers
 
         private string GetSign(Dictionary<string, object> data)
         {
-            data.Add("key", this.secret_key);
+            if (!data.ContainsKey("key")) data.Add("key", this.secret_key);
             string value = data.OrderBy(c => c.Key).ToQueryString();
             data.Remove("key");
             return value.toMD5().ToLower();

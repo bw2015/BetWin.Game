@@ -56,6 +56,9 @@ namespace BetWin.Game.Lottery.Plays.Smart
             Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune
         };
 
+        /// <summary>
+        /// 默认赔率
+        /// </summary>
         protected override Odds DefaultOdds => new Dictionary<string, decimal>()
         {
             { Mercury,15 },
@@ -64,7 +67,7 @@ namespace BetWin.Game.Lottery.Plays.Smart
             { Mars,5 },
             { Jupiter,15 },
             { Saturn,5 },
-            { Uranus,40 },
+            { Uranus,25 },
             { Neptune,5 }
         };
 

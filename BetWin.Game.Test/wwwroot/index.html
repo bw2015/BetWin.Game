@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="//studio.a8.to/lay/ui/css/layui.css" media="all">
     <link rel="stylesheet" href="//studio.a8.to/lay/ui/css/layui.extend.css" media="all">
     <link href="//studio.a8.to/css/icon.css" rel="stylesheet" />
-    <base href="http://localhost:5000" />
     <style type="text/css">
         body { max-width: 720px; margin: auto; }
         .layui-btn.current { background-color: #1E9FFF; color: #fff; }
@@ -29,7 +28,7 @@
             </div>
             <div id="game-setting"></div>
             <div class="layui-form-item layui-text-center">
-                <button class="layui-btn am-icon-save"> 保存游戏接口配置</button>
+                <button class="layui-btn am-icon-save" lay-submit lay-filter="game-submit"> 保存游戏接口配置</button>
             </div>
         </form>
     </fieldset>
@@ -40,16 +39,40 @@
 
             </label>
         </legend>
-        <div class="layui-form">
+        <div class="layui-form" lay-filter="model">
             <hr />
             <div class="layui-form-item" id="model"></div>
             <div class="layui-form-item layui-text-center">
-                <button class="layui-btn layui-btn-normal am-icon-send"> 发起请求</button>
+                <button class="layui-btn layui-btn-normal am-icon-send" lay-submit lay-filter="model-submit"> 发起请求</button>
             </div>
         </div>
     </fieldset>
 
     <script type="text/javascript">
+        const getUrl = path => {
+            let search = location.search,
+                regex = /domain=([^&]+)/,
+                domain = "";
+            if (regex.test(search)) {
+                domain = regex.exec(search)[1];
+            }
+            return domain + path;
+        };
+
+        const jsonViewer = function (elemId, json) {
+            if (!window["jQuery"]) window["jQuery"] = layui.$;
+            var elem = jQuery("#" + elemId);
+            layui.link("//studio.a8.to/plus-in/json-viewer/jquery.json-viewer.css");
+            if (elem.jsonViewer) {
+                elem.jsonViewer(json);
+            } else {
+                jQuery.getScript("//studio.a8.to/plus-in/json-viewer/jquery.json-viewer.js", function () {
+                    elem.jsonViewer(json);
+                });
+            }
+        };
+
+
         layui.use(["form"], () => {
             const form = layui.form,
                 $ = layui.$,
@@ -64,27 +87,38 @@
                 },
                 loadGame = () => {
                     var data = form.val("game");
-                    $.post("/game/getSetting", data, res => {
+                    $.post(getUrl("/game/getSetting"), data, res => {
                         let html = [];
+                        let setting = localStorage.getItem(data.game) && JSON.parse(localStorage.getItem(data.game)) || {};
                         res.forEach(item => {
-                            html.push(`<div class="layui-form-item">
-                                                                <label class="layui-form-label">${item.description}</label>
-                                                                <div class="layui-input-block"><input type="text" class="layui-input" name="${item.name}" value="${item.value}" /></div>
-                                                                </div>`);
+                            html.push(`<div class="layui-form-item">`,
+                                `<label class="layui-form-label">${item.description}</label>`,
+                                `<div class="layui-input-block"><input type="text" class="layui-input" name="${item.name}" value="${setting[item.name] || item.value}" /></div>`,
+                                `</div>`);
                         });
                         document.getElementById("game-setting").innerHTML = html.join("");
                     });
                 },
                 loadModel = model => {
-                    $.post("/game/getModel", {
+                    let elem = document.getElementById("method");
+                    let btn = elem.querySelector(".current");
+                    if (btn) btn.classList.remove("current");
+
+                    btn = elem.querySelector(`[data-method='${model}']`);
+                    if (btn) btn.classList.add("current");
+
+                    $.post(getUrl("/game/getModel"), {
                         model
                     }, res => {
-                        let html = [];
+                        let html = [],
+                            game = localStorage.getItem("game"),
+                            key = `${game}:${model}`;
+                        let data = localStorage.getItem(key) && JSON.parse(localStorage.getItem(key)) || {};
                         res.forEach(name => {
-                            html.push(`<div class="layui-inline">
-                                          <label class="layui-form-label">${name}</label>
-                                          <div class="layui-input-block"><input type="text" class="layui-input" name="${name}" /></div>
-                                          </div>`);
+                            html.push(`<div class="layui-inline">`,
+                                `<label class="layui-form-label">${name}</label>`,
+                                `<div class="layui-input-block"><input type="text" class="layui-input" name="${name}" value="${data[name] || ""}" /></div>`,
+                                `</div>`);
                         });
                         document.getElementById("model").innerHTML = html.join("");
                     });
@@ -98,13 +132,7 @@
                 });
                 elem.innerHTML = html.join("");
                 $(elem).on("click", "[data-method]", e => {
-                    let btn = elem.querySelector(".current");
-                    if (btn) btn.classList.remove("current");
-
-                    btn = e.target;
-                    let model = btn.getAttribute("data-method");
-                    btn.classList.add("current");
-
+                    let model = e.target.getAttribute("data-method");
                     loadModel(model);
                 });
             }();
@@ -112,13 +140,56 @@
             loadModel("LoginModel");
 
             // 加载游戏类型
-            $.post("/game/getGames", null, res => {
+            $.post(getUrl("/game/getGames"), null, res => {
                 Object.keys(res).forEach(type => {
                     document.getElementById("game").options.add(new Option(res[type], type));
                 });
+                document.getElementById("game").value = localStorage.getItem("game");
                 form.render(null, "game");
                 form.on("select", loadGame);
                 loadGame();
+            });
+
+            form.on("submit(game-submit)", e => {
+                let game = e.field.game;
+                localStorage.setItem("game", game);
+                localStorage.setItem(game, JSON.stringify(e.field));
+                layer.msg("设定成功");
+                return false;
+            });
+
+            form.on("submit(model-submit)", e => {
+                let game = localStorage.getItem("game"),
+                    setting = localStorage.getItem(game),
+                    model = JSON.stringify(e.field);
+
+                let elem = document.getElementById("method");
+                let btn = elem.querySelector(".current");
+                let method = btn.getAttribute("data-method"),
+                    url = getUrl(`/game/${method.replace("Model", "")}?game=${game}`);
+
+                $.ajax({
+                    url: url,
+                    type: "post",
+                    title: `${game} - ${method}`,
+                    data: {
+                        setting, model
+                    },
+                    error: (xhr) => {
+                        layer.alert(xhr.responseText, {
+                            icon: 2
+                        });
+                    },
+                    success: res => {
+                        localStorage.setItem(`${game}:${method}`, model);
+                        layer.alert(`<div id="result"></div>`, {
+                            area: ["640px", "480px"],
+                            success: layero => {
+                                jsonViewer("result", res);
+                            }
+                        });
+                    }
+                });
             })
         })
     </script>

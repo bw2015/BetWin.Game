@@ -122,5 +122,21 @@ namespace BetWin.Game.Test
             var response = handler.Balance(model);
             return new JsonResult(response);
         }
+
+        [HttpPost]
+        public IActionResult Transfer([FromQuery] GameType game, [FromForm] string setting, [FromJson] TransferModel model)
+        {
+            IGameHandler? handler = this.GetHandler(game, setting);
+            var response = handler.Transfer(model);
+            return new JsonResult(response);
+        }
+
+        [HttpPost]
+        public IActionResult CheckTransfer([FromQuery] GameType game, [FromForm] string setting, [FromJson] CheckTransferModel model)
+        {
+            IGameHandler? handler = this.GetHandler(game, setting);
+            var response = handler.CheckTransfer(model);
+            return new JsonResult(response);
+        }
     }
 }
