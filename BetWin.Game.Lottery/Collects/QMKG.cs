@@ -1,4 +1,5 @@
 ﻿using BetWin.Game.Lottery.Collects.Models;
+using BetWin.Game.Lottery.Enums;
 using BetWin.Game.Lottery.Models;
 using BetWin.Game.Lottery.Utils;
 using Newtonsoft.Json;
@@ -20,6 +21,7 @@ namespace BetWin.Game.Lottery.Collects
     public class QMKG : CollectProviderBase
     {
 
+        public override LotteryType Type => LotteryType.Smart;
         public string x_gopen_id { get; set; } = "OGr65LJSYMXg8PGV-j4pnZw9-oiA";
 
         public string x_gopen_session_key { get; set; } = "AQFuybaomg3hZNhBsM+EXQ";

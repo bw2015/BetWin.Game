@@ -1,4 +1,5 @@
 ﻿using BetWin.Game.Lottery.Collects.Models;
+using BetWin.Game.Lottery.Enums;
 using BetWin.Game.Lottery.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -15,6 +16,8 @@ namespace BetWin.Game.Lottery.Collects
     [Description("金闪闪")]
     public class JSS : CollectProviderBase
     {
+        public override LotteryType Type => LotteryType.Smart;
+
         public string Gateway { get; set; } = "https://amc.kmactoer.cn/lottery/history";
 
         public string Token { get; set; } = "779f0023-068d-40e9-b27b-8899fe700367";

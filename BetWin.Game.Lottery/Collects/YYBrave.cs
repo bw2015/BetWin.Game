@@ -1,4 +1,5 @@
 ﻿using BetWin.Game.Lottery.Collects.Models;
+using BetWin.Game.Lottery.Enums;
 using BetWin.Game.Lottery.Utils;
 using Newtonsoft.Json;
 using SP.StudioCore.Net.Http;
@@ -14,6 +15,7 @@ namespace BetWin.Game.Lottery.Collects
     internal class YYBrave : CollectProviderBase
     {
 
+        public override LotteryType Type => LotteryType.Smart;
         public string url { get; set; } = "https://ysapi.yy.com/api/public/pointsoldiersyyp/queryRecentResultInfo.json?data=%7B%22extendInfo%22:%7B%7D,%22mode%22:5%7D&ticket=boIB7zCCAeugAwIBBaEDAgEOogcDBQAAAAAAo4IBXGGCAVgwggFUoAMCAQWhERsPeXkuY29tAAAEAAEKQ7CAohEwD6ADAgEBoQgwBhsENTA2MKOCASUwggEhoAQCAgEVoQMCAQKiggESBIIBDggCAKCJfwAACAIAoIl%252FAABmQHrVxRNSiPJKkcq1gStM4vGhsQtPUSysRwnm2yRiyBWiTDh9w7RvIHEwjNO1LG8y7GsA%252BDam82mQ7cNFuOR8HmmNuhROKCzowZtfnq9i7JWMZ861R3OOzKiXDIpMrC2AR1CJUUaPeug03bwEUKY7ZAjZEO1CeOj8eatGOz25hSYewTp3fpod%252F%252FxRHJINkaxn5zY5oMzGdQzCz0YEzZH4c9e9hmXUWJ2vh0MabwEUtbzRt2M7orpTpViIivFjR90RNqeHiuHLdI9rPvoL%252BT9P1T2jD7ntc9%252BH2pEczL2CQ2G%252FJZEJqxFFHB4UF8yBBgX7L9vCprMNfoUS0iCagqR2MHSgAwIBEaJtBGsccm7cxdMAYEUdIE6Z5TaGo4RlHHbI6Zlm5lm9VsVA0RReZcdJIYu0%252F14ZnhEGiiMt%252B1FJELOjFXnzhrsUv3%252F3yqNiAz7WBXRNjbfdSGtG8Mrxcttv90w8wLBh8ZdsB3pKI1BHDVTKI8H%252B3A%253D%253D";
 
         public YYBrave(string setting) : base(setting)

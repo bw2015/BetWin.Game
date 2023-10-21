@@ -1,4 +1,5 @@
 ﻿using BetWin.Game.Lottery.Collects.Models;
+using BetWin.Game.Lottery.Enums;
 using BetWin.Game.Lottery.Models;
 using BetWin.Game.Lottery.Utils;
 using Newtonsoft.Json;
@@ -13,6 +14,8 @@ namespace BetWin.Game.Lottery.Collects
     [Description("火箭升空(系统)")]
     public class SystemRockup : SystemProviderBase
     {
+        public override LotteryType Type => LotteryType.Smart;
+
         public SystemRockup(string setting) : base(setting)
         {
         }
@@ -75,7 +78,11 @@ namespace BetWin.Game.Lottery.Collects
             string index = DateTime.Now.AddMinutes(-1).ToString("yyyyMMddHHmm");
 
             //# 判断是否已经开过
-            string number = this.CreateNumber();
+
+            BetOrderResult? orderResult = this.handler?.GetOrderResult(this.lotteryCode);
+
+            string number = this.CreateNumber(orderResult, out List<string> logs);
+
             Console.WriteLine($"随机号码 => {number}");
             yield return new CollectData()
             {

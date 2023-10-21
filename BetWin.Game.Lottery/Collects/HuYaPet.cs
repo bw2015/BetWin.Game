@@ -1,4 +1,5 @@
 ﻿using BetWin.Game.Lottery.Collects.Models;
+using BetWin.Game.Lottery.Enums;
 using BetWin.Game.Lottery.Models;
 using BetWin.Game.Lottery.Utils;
 using Newtonsoft.Json;
@@ -15,6 +16,8 @@ namespace BetWin.Game.Lottery.Collects
     [Description("宠物马拉松")]
     public class HuYaPet : CollectProviderBase
     {
+        public override LotteryType Type => LotteryType.Smart;
+
         public string gateway { get; set; } = "http://api.a8.to/Common/API_GetData";
 
         public string key { get; set; } = "HY.pet";

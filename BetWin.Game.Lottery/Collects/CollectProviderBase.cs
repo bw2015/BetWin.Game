@@ -1,4 +1,5 @@
 ﻿using BetWin.Game.Lottery.Collects.Models;
+using BetWin.Game.Lottery.Enums;
 using BetWin.Game.Lottery.Handlers;
 using Newtonsoft.Json;
 using SP.StudioCore.Ioc;
@@ -34,5 +35,7 @@ namespace BetWin.Game.Lottery.Collects
         /// </summary>
         /// <returns></returns>
         public abstract IEnumerable<CollectData> Execute();
+
+        public abstract LotteryType Type { get; }
     }
 }

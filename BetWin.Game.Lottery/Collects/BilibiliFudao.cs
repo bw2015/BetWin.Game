@@ -1,4 +1,5 @@
 ﻿using BetWin.Game.Lottery.Collects.Models;
+using BetWin.Game.Lottery.Enums;
 using BetWin.Game.Lottery.Utils;
 using Newtonsoft.Json.Linq;
 using SP.StudioCore.Net.Http;
@@ -15,6 +16,8 @@ namespace BetWin.Game.Lottery.Collects
     {
         [Description("采集地址")]
         public string Url { get; set; } = "https://api-live-bo.biliapi.net/xlive/fuxi-interface/ExploreController/getExploreLog?_ts_rpc_args_=%5B30805134%2C%223546383095171461%22%5D&access_key=b2732f2ce3fbbb7175996c304f9b5591CjDE3dn7-ffHLeckc3cg3SXePb72AqxI45Crx_15__e1OEoxLHfm4biaxHxtAQ0VcMwSVjM3RGtlYmF0SDhJamRkcXNfX21NRGNHR2JkTk04Mk9TVmFpalg4R29jb2xwM09CbE5sT1VqQnVUeExJMGpCcjk3cmg3cWl2TFFXQnlaSnRmNjVkM2l3IIEC&actionKey=appkey&appkey=1d8b6e7d45233436&build=7450400&c_locale=zh_CN&channel=xqxz_h5&device=android&disable_rcmd=0&mobi_app=android&platform=android&s_locale=zh_CN&statistics=%7B%22appId%22%3A1%2C%22platform%22%3A3%2C%22version%22%3A%227.45.0%22%2C%22abtest%22%3A%22%22%7D&ts=1695559739&sign=1166391a4871cb6c631fb917feb77ed0";
+
+        public override LotteryType Type => LotteryType.Smart;
 
         public BilibiliFudao(string setting) : base(setting)
         {
