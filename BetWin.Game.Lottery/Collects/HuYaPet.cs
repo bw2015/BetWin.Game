@@ -65,7 +65,7 @@ namespace BetWin.Game.Lottery.Collects
                 if (openTime > DateTime.Now) openTime = openTime.AddYears(-1);
                 string number = this.getNumber(pet.locList[0]);
 
-                yield return new CollectData(index, number, WebAgent.GetTimestamps(openTime.AddMinutes(2)));
+                yield return new CollectData(index, number, WebAgent.GetTimestamps(openTime.AddMinutes(2).AddSeconds(DateTime.Now.Second)));
             }
         }
 
