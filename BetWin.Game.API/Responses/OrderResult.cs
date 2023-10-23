@@ -16,6 +16,13 @@ namespace BetWin.Game.API.Responses
         /// </summary>
         public List<OrderData>? data { get; set; }
 
+        /// <summary>
+        /// 本次实际查询的范围
+        /// </summary>
+        public long? startTime { get; set; }
+
+        public long? endTime { get; set; }
+
         public static implicit operator OrderResult(GameResultCode code)
         {
             return new OrderResult(code);

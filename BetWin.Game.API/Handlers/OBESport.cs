@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace BetWin.Game.API.Handlers
 {
@@ -130,7 +131,98 @@ namespace BetWin.Game.API.Handlers
 
         public override OrderResult GetOrder(QueryOrderModel request)
         {
-            throw new NotImplementedException();
+            // 1.只能查询当前时间30天前至当前时间区间
+            // 2.查询截至时间为当前时间5分钟前
+            // 3.每次查询时间区间为30分钟以内
+
+            long now = WebAgent.GetTimestamp(DateTime.Now.AddMinutes(-5)),
+                beginTime = WebAgent.GetTimestamp(DateTime.Now.AddDays(-30)),
+               startTime = request.StartTime / 1000,
+               endTime = Math.Min(now, request.EndTime / 1000);
+            if (startTime < beginTime)
+            {
+                startTime = beginTime;
+                endTime = startTime + 30 * 60;
+            }
+            if (endTime - startTime > 30 * 60) endTime = Math.Min(now, startTime + 30 * 60);
+            if (startTime > endTime) startTime = endTime - 60;
+
+            long orderId = 0;
+            List<OrderData> list = new List<OrderData>();
+            Dictionary<string, object> data = new Dictionary<string, object>
+            {
+                {"merchant",this.merchant },
+                {"start_time",startTime },
+                {"end_time",endTime },
+                {"last_order_id",orderId },
+                {"page_size",1000 },
+                {"agency",false },
+            };
+            data["sign"] = GetOrderSign(data);
+            GameResultCode code;
+            while (true)
+            {
+                data["last_order_id"] = orderId;
+                orderResponse result = this.Post<orderResponse>(APIMethod.GetOrder, "/v2/pull/order/queryScroll", data, out code);
+                if (code != GameResultCode.Success) break;
+
+                foreach (order item in result.bet)
+                {
+                    ESportData esport = new ESportData()
+                    {
+                        betId = item.market_id,
+                        content = item.odd_name,
+                        gameId = item.game_id,
+                        leagueId = item.tournament_id,
+                        matchId = item.match_id,
+                        odds = item.odd,
+                        oddsType = GameAPIOddsType.EU
+                    };
+                    GameAPIOrderStatus status = item.bet_status switch
+                    {
+                        3 => GameAPIOrderStatus.Wait,
+                        5 => GameAPIOrderStatus.Win,
+                        8 => GameAPIOrderStatus.Win,
+                        6 => GameAPIOrderStatus.Lose,
+                        9 => GameAPIOrderStatus.Lose,
+                        _ => GameAPIOrderStatus.Return,
+                    };
+                    decimal amount = item.bet_amount;
+                    decimal money = 0;
+                    if (status == GameAPIOrderStatus.Win || status == GameAPIOrderStatus.Lose)
+                    {
+                        money = item.win_amount - amount;
+                    }
+                    string rawData = item.ToJson();
+                    list.Add(new OrderData
+                    {
+                        betAmount = status == GameAPIOrderStatus.Return ? 0 : Math.Min(Math.Abs(money), amount),
+                        betMoney = amount,
+                        category = esport.Type,
+                        createTime = item.bet_time,
+                        currency = ConvertCurrency(item.currency_code.ToString()),
+                        gameCode = esport.gameId,
+                        money = money,
+                        orderId = item.id,
+                        playerName = item.member_account,
+                        rawData = rawData,
+                        hash = string.Concat(item.id, ":", item.update_time),
+                        settleTime = item.settle_time * 1000L,
+                        status = status,
+                        data = esport
+                    });
+                }
+
+                if (result.bet.Length < 1000) break;
+                orderId = result.lastOrderID;
+            }
+
+            return new OrderResult(code)
+            {
+                data = list,
+                startTime = startTime * 1000L,
+                endTime = endTime * 1000L
+            };
         }
 
         public override LoginResponse Login(LoginModel request)
@@ -192,7 +284,22 @@ namespace BetWin.Game.API.Handlers
 
         public override TransferResponse Transfer(TransferModel request)
         {
-            string transferId = DateTime.Now.ToString("yyyyMMddHHmmss") + (WebAgent.GetTimestamps() % 1000000L).ToString().PadLeft(6, '0');
+            List<string> transfers = new List<string>();
+            string md5 = request.OrderID.toMD5();
+            Regex regex = new Regex(@"\d");
+            if (!regex.IsMatch(md5)) return new TransferResponse(GameResultCode.TransferInvalid);
+            while (true)
+            {
+                foreach (Match match in regex.Matches(md5))
+                {
+                    transfers.Add(match.Value);
+                    if (transfers.Count >= 20) break;
+                }
+                if (transfers.Count >= 20) break;
+            }
+
+            //转账订单号（20~32位）
+            string transferId = string.Join(string.Empty, transfers);
             Dictionary<string, object> data = new Dictionary<string, object>
             {
                 {"amount",Math.Abs(request.Money) },
@@ -300,7 +407,7 @@ namespace BetWin.Game.API.Handlers
             {
                 HttpClientResponse response = client.Get(request.Url + "?" + request.Data, new Dictionary<string, string>()
                 {
-
+                     { "Accept-Encoding", "gzip" }
                 });
                 return response;
             }
@@ -337,6 +444,13 @@ namespace BetWin.Game.API.Handlers
             string value = data.OrderBy(c => c.Key).ToQueryString();
             data.Remove("key");
             return value.toMD5().ToLower();
+        }
+
+        private string GetOrderSign(Dictionary<string, object> data)
+        {
+            string random = Guid.NewGuid().ToString("N")[..8];
+            string sign = GetSign(data);
+            return $"{random[..2]}{sign[..9]}{random.Substring(2, 2)}{sign.Substring(9, 8)}{random.Substring(4, 2)}{sign[17..]}{random[6..]}";
         }
 
         #endregion

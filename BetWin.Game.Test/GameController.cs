@@ -138,5 +138,13 @@ namespace BetWin.Game.Test
             var response = handler.CheckTransfer(model);
             return new JsonResult(response);
         }
+
+        [HttpPost]
+        public IActionResult QueryOrder([FromQuery] GameType game, [FromForm] string setting, [FromJson] QueryOrderModel model)
+        {
+            IGameHandler? handler = this.GetHandler(game, setting);
+            var response = handler.GetOrder(model);
+            return new JsonResult(response);
+        }
     }
 }

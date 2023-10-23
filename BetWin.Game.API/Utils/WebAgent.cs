@@ -40,5 +40,15 @@ namespace BetWin.Game.API.Utils
             }
             return ip;
         }
+
+        /// <summary>
+        /// 秒 时间戳
+        /// </summary>
+        /// <param name="dateTime"></param>
+        /// <returns></returns>
+        internal static long GetTimestamp(DateTime dateTime)
+        {
+            return WebAgent.GetTimestamps(dateTime) / 1000L;
+        }
     }
 }

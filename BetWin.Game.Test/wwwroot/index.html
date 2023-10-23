@@ -168,6 +168,7 @@
                 let method = btn.getAttribute("data-method"),
                     url = getUrl(`/game/${method.replace("Model", "")}?game=${game}`);
 
+                var index = layer.load(2, { time: 10 * 1000 });
                 $.ajax({
                     url: url,
                     type: "post",
@@ -188,6 +189,9 @@
                                 jsonViewer("result", res);
                             }
                         });
+                    },
+                    complete: () => {
+                        layer.close(index);
                     }
                 });
             })
