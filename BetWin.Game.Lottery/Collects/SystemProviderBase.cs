@@ -1,5 +1,6 @@
 ﻿using BetWin.Game.Lottery.Base;
 using BetWin.Game.Lottery.Models;
+using BetWin.Game.Lottery.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -36,43 +37,21 @@ namespace BetWin.Game.Lottery.Collects
         /// <returns></returns>
         private string CreateNumber()
         {
-            decimal total = DefaultOdds.Sum(t => t.Value);
-
-            // 所有的开奖号码
-            string[] numbers = this.DefaultOdds.Select(t => t.Key).ToArray();
-
-            // 离散列表
-            decimal[] results = this.DefaultOdds.Select(t => total / t.Value).ToArray();
-
-            // 权重数列
-            Tuple<string, decimal>[] weights = new Tuple<string, decimal>[results.Length];
-            decimal p = decimal.Zero;
-            for (int i = 0; i < results.Length; i++)
-            {
-                p += results[i];
-                weights[i] = new Tuple<string, decimal>(numbers[i], p);
-            }
-
-            int random = new Random().Next((int)total);
-            string number = weights.First(t => random < t.Item2).Item1;
-
-            return number;
+            return this.DefaultOdds.ToDictionary(t => t.Key, t => (double)t.Value).GetRandom();
         }
 
         /// <summary>
         /// 获取号码
         /// </summary>
-        /// <param name="betMoney">总投注金额</param>
-        /// <param name="money">总盈亏</param>
-        /// <param name="orders">当前期的投注号码</param>
+        /// <param name="orderResult">当前期的下注数据</param>
         /// <returns></returns>
         protected virtual string CreateNumber(BetOrderResult? orderResult, out List<string> logs)
         {
             logs = new List<string>();
-            if (this.Kill == 0 || orderResult == null || !orderResult.Value.Orders.Any())
+            if (this.Kill == 0 || orderResult == null || orderResult.Value.Orders.Any())
             {
                 if (this.Kill == 0) logs.Add($"当前配置随机开奖");
-                if (!orderResult.Value.Orders.Any()) logs.Add($"当前期没有注单，随机开奖");
+                if (orderResult != null && !orderResult.Value.Orders.Any()) logs.Add($"当前期没有注单，随机开奖");
                 return this.CreateNumber();
             }
 

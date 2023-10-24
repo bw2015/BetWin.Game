@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\SP.StudioCore\SP.StudioCore.csproj" />
     <ProjectReference Include="..\BetWin.Game.API\BetWin.Game.API.csproj" />
+    <ProjectReference Include="..\BetWin.Game.Lottery\BetWin.Game.Lottery.csproj" />
   </ItemGroup>
 
 </Project>
