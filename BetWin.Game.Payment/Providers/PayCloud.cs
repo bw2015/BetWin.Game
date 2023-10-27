@@ -53,30 +53,29 @@ namespace BetWin.Game.Payment.Providers
         /// </summary>
         protected override CallbackResponse callback(HttpContext context)
         {
-            string body = context.GetString();
-            if (string.IsNullOrEmpty(body))
-            {
-                return default;
-            }
-            JObject info = JObject.Parse(body);
-            if (info["state"]?.Value<int>() != 1)
+            string state = context.Request.Form["state"];
+            string text = context.Request.Form["text"];
+            string identifier = context.Request.Form["identifier"];
+
+            if (state != "1")
             {
                 return new CallbackResponse()
                 {
+                    status = HttpStatusCode.BadRequest,
                     result = "false"
                 };
             };
 
             string netPublicKey = new RsaHelper().RSAPublicKeyJava2DotNet(this.publicKey);
             RsaHelper rsaHelper = new RsaHelper(netPublicKey, null, false);
-            JObject result = JObject.Parse(rsaHelper.Decrypt(info["text"]?.Value<string>() ?? string.Empty));
+            JObject result = JObject.Parse(rsaHelper.Decrypt(text ?? string.Empty));
 
             return new CallbackResponse()
             {
                 success = true,
                 status = HttpStatusCode.OK,
-                orderId = info["identifier"]?.Value<string>(),
-                tradeNo = info["identifier"]?.Value<string>(),
+                orderId = identifier,
+                tradeNo = identifier,
                 currency = PaymentCurrency.CNY,
                 amount = result["orderInfo"]?["payeeSum"]?.Value<decimal>() / 100M,
                 result = "true"
