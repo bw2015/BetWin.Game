@@ -16,6 +16,10 @@ namespace BetWin.Game.Payment.Enums
         /// <summary>
         /// USDT - TRC20 波场协议
         /// </summary>
-        USDT_TRC20 = 2
+        USDT_TRC20 = 2,
+        /// <summary>
+        /// 支付宝
+        /// </summary>
+        Alipay = 3
     }
 }
