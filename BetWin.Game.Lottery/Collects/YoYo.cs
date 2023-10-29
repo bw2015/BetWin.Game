@@ -63,7 +63,7 @@ namespace BetWin.Game.Lottery.Collects
                 };
 
                 string index = openTime.Value.ToString("yyyyMMddHHmm");
-                yield return new CollectData(index, number, WebAgent.GetTimestamps(openTime.Value));
+                yield return new CollectData(index, number, WebAgent.GetTimestamps(openTime.Value.AddSeconds(45)));
             }
 
             // 45秒的时候开奖
