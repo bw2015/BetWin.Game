@@ -12,6 +12,17 @@ namespace BetWin.Game.Payment.Models
     public struct CallbackResponse
     {
         /// <summary>
+        /// 错误的输出代码
+        /// </summary>
+        /// <param name="status"></param>
+        /// <param name="result"></param>
+        public CallbackResponse(HttpStatusCode status, string result) : this()
+        {
+            this.status = status;
+            this.result = result;
+        }
+
+        /// <summary>
         /// 返回的状态码
         /// </summary>
         public HttpStatusCode status { get; set; }

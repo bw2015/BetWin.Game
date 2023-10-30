@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace BetWin.Game.Payment.Enums
@@ -7,19 +8,27 @@ namespace BetWin.Game.Payment.Enums
     /// <summary>
     /// 本地的钱包类型
     /// </summary>
-    public enum WithdrawWalletType
+    public enum WalletType : byte
     {
         /// <summary>
         /// 银行卡
         /// </summary>
+        [Description("银行卡")]
         Bank = 1,
         /// <summary>
         /// USDT - TRC20 波场协议
         /// </summary>
-        USDT_TRC20 = 2,
+        [Description("数字货币")]
+        Chain = 2,
         /// <summary>
         /// 支付宝
         /// </summary>
-        Alipay = 3
+        [Description("支付宝")]
+        Alipay = 3,
+        /// <summary>
+        /// OKPay
+        /// </summary>
+        [Description("OKPay")]
+        OKPay = 4
     }
 }

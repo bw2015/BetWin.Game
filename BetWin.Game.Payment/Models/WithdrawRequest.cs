@@ -23,12 +23,12 @@ namespace BetWin.Game.Payment.Models
         /// <summary>
         /// 钱包类型
         /// </summary>
-        public WithdrawWalletType? wallet { get; set; }
+        public WalletType? wallet { get; set; }
 
         /// <summary>
         /// 银行简码
         /// </summary>
-        public PaymentBankCode? bankCode { get; set; }
+        public string? bankCode { get; set; }
 
         /// <summary>
         /// 收款人的姓名（适用于银行打款）

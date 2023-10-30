@@ -11,14 +11,12 @@ using System.Text;
 
 namespace BetWin.Game.Lottery.Collects
 {
-    [Description("YY 勇者之路")]
-    internal class YYBrave : CollectProviderBase
+    [Description("YY 纵横战场")]
+    internal class YYBattle : CollectProviderBase
     {
+        public string url { get; set; } = "https://ysapi.yy.com/api/public/pointsoldiersyyp/queryRecentResultInfo.json?data=%7B%22extendInfo%22:%7B%7D,%22mode%22:0%7D&ticket=boIB7zCCAeugAwIBBaEDAgEOogcDBQAAAAAAo4IBXGGCAVgwggFUoAMCAQWhERsPeXkuY29tAAAEAAEKQ7CAohEwD6ADAgEBoQgwBhsENTA2MKOCASUwggEhoAQCAgEVoQMCAQKiggESBIIBDggCAMDNfwAACAIAwM1%252FAABmQHrVxRNSiPJKkcq1gStM4vGhsQtPUSysRwnmoe5kZuChQckae4G1cSj7iJy1LG8y7GsA%252BDam82mQ7cNFuOR8HmmNuhROKCzowZtfnq9i7JWMZ861R3OOzKiXDIpMrC2AR1CJUUaPhNmFLL6TLHjbZAjZEO1CeOj8qPGcByyaEcoY4zp3fpod%252F%252FxRHJINkaxn5zY5oMzGdQzCz0YEzZH4c9e9hmXUWJ2vh0MabwEUtbzRt2M7orpTpViIivFjR90RNqeHiuHLdI9rPvoL%252BT8e%252BZdn4POFS2%252BmulVAAroCkBWu8bMJqxFFHB4UF8yBBgX7L7lXOtciJVnAFe6lIKR2MHSgAwIBEaJtBGtCipyG4IwpMLkX1xBiMvnJ5BlltKpDVKxd%252BDj5zpbGHam9gEbSVU2U7TKMGxLqv2ROb%252FNBFJIYQj6ZN3AgQYApZJtCdnMbL57TNr%252F9U06qRlm9gxz46BGZb4zPl54yVpSe8VvkheRSHF%252Bd9Q%253D%253D";
 
-        public override LotteryType Type => LotteryType.Smart;
-        public string url { get; set; } = "https://ysapi.yy.com/api/public/pointsoldiersyyp/queryRecentResultInfo.json?data=%7B%22extendInfo%22:%7B%7D,%22mode%22:5%7D&ticket=boIB7zCCAeugAwIBBaEDAgEOogcDBQAAAAAAo4IBXGGCAVgwggFUoAMCAQWhERsPeXkuY29tAAAEAAEKQ7CAohEwD6ADAgEBoQgwBhsENTA2MKOCASUwggEhoAQCAgEVoQMCAQKiggESBIIBDggCAKCJfwAACAIAoIl%252FAABmQHrVxRNSiPJKkcq1gStM4vGhsQtPUSysRwnm2yRiyBWiTDh9w7RvIHEwjNO1LG8y7GsA%252BDam82mQ7cNFuOR8HmmNuhROKCzowZtfnq9i7JWMZ861R3OOzKiXDIpMrC2AR1CJUUaPeug03bwEUKY7ZAjZEO1CeOj8eatGOz25hSYewTp3fpod%252F%252FxRHJINkaxn5zY5oMzGdQzCz0YEzZH4c9e9hmXUWJ2vh0MabwEUtbzRt2M7orpTpViIivFjR90RNqeHiuHLdI9rPvoL%252BT9P1T2jD7ntc9%252BH2pEczL2CQ2G%252FJZEJqxFFHB4UF8yBBgX7L9vCprMNfoUS0iCagqR2MHSgAwIBEaJtBGsccm7cxdMAYEUdIE6Z5TaGo4RlHHbI6Zlm5lm9VsVA0RReZcdJIYu0%252F14ZnhEGiiMt%252B1FJELOjFXnzhrsUv3%252F3yqNiAz7WBXRNjbfdSGtG8Mrxcttv90w8wLBh8ZdsB3pKI1BHDVTKI8H%252B3A%253D%253D";
-
-        public YYBrave(string setting) : base(setting)
+        public YYBattle(string setting) : base(setting)
         {
         }
 
@@ -29,11 +27,15 @@ namespace BetWin.Game.Lottery.Collects
                 "战士" => "1",
                 "弓箭手" => "2",
                 "骑士" => "3",
-                "守护者" => "4",
-                "超级天使" => "5",
+                "法师" => "4",
+                "魔导师" => "5",
+                "守护者" => "6",
+                "大天使" => "7",
                 _ => "0"
             };
         }
+
+        public override LotteryType Type => LotteryType.Smart;
 
         public override IEnumerable<CollectData> Execute()
         {

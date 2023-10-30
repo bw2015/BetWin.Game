@@ -19,6 +19,7 @@ namespace BetWin.Game.Lottery.Handlers
         /// <param name="index">彩期</param>
         /// <param name="value">自定义对象</param>
         public void SaveIndexData(string lotteryCode, string index, object value);
+
         BetOrderResult GetOrderResult(string lotteryCode);
     }
 }

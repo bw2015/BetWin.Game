@@ -48,10 +48,16 @@ namespace BetWin.Game.Lottery.Collects
         protected virtual string CreateNumber(BetOrderResult? orderResult, out List<string> logs)
         {
             logs = new List<string>();
-            if (this.Kill == 0 || orderResult == null || orderResult.Value.Orders.Any())
+            if (this.Kill == 0 || orderResult == null || !orderResult.Value)
             {
-                if (this.Kill == 0) logs.Add($"当前配置随机开奖");
-                if (orderResult != null && !orderResult.Value.Orders.Any()) logs.Add($"当前期没有注单，随机开奖");
+                if (this.Kill == 0)
+                {
+                    logs.Add($"当前配置随机开奖");
+                }
+                else
+                {
+                    logs.Add($"当前期没有注单，随机开奖");
+                }
                 return this.CreateNumber();
             }
 
