@@ -65,8 +65,22 @@ namespace BetWin.Game.Lottery.Collects
                 if (openTime > DateTime.Now) openTime = openTime.AddYears(-1);
                 string number = this.getNumber(pet.locList[0]);
 
-                yield return new CollectData(index, number, WebAgent.GetTimestamps(openTime.AddMinutes(2).AddSeconds(DateTime.Now.Second)));
+                yield return new CollectData(index, number, WebAgent.GetTimestamps(getOpenTime(openTime)));
             }
+        }
+
+        /// <summary>
+        /// 根据当前时间生成开奖时间
+        /// </summary>
+        /// <param name="openTime"></param>
+        /// <returns></returns>
+        private DateTime getOpenTime(DateTime openTime)
+        {
+            DateTime now = DateTime.Now;
+            openTime = openTime.AddMinutes(2);
+            if (now - openTime < TimeSpan.FromMinutes(1)) return openTime.AddSeconds(now.Second);
+            if (now - openTime < TimeSpan.FromMinutes(1.5)) return now.AddSeconds(-3);
+            return openTime;
         }
 
         string getNumber(string petName)
