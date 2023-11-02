@@ -72,13 +72,17 @@ namespace BetWin.Game.Lottery.Collects
                 { Neptune,5 }
             };
 
+        private static string _lastIndex = "";
+
         public override IEnumerable<CollectData> Execute()
         {
-            //# 得到当前的时间点
+            //# 得到当前需要开奖的期号
             string index = DateTime.Now.AddMinutes(-1).ToString("yyyyMMddHHmm");
 
-            //# 判断是否已经开过
+            //#2 判断是否已经开过
+            if (_lastIndex == index) yield break;
 
+            //# 获取当前期的投注数据
             BetOrderResult? orderResult = this.handler?.GetOrderResult(this.lotteryCode);
 
             string number = this.CreateNumber(orderResult, out List<string> logs);
@@ -92,13 +96,16 @@ namespace BetWin.Game.Lottery.Collects
             };
 
             DateTime startTime = DateTime.Now.AddSeconds(-DateTime.Now.Second);
-            this.handler?.SaveStepTime(this.lotteryCode ?? string.Empty, new StepTimeModel()
-            {
-                index = DateTime.Now.ToString("yyyyMMddHHmm"),
-                startTime = WebAgent.GetTimestamps(startTime),
-                endTime = WebAgent.GetTimestamps(startTime.AddSeconds(50)),
-                openTime = WebAgent.GetTimestamps(startTime.AddMinutes(1))
-            });
+
+            // 当前的可投注期号
+            string betIndex = DateTime.Now.ToString("yyyyMMddHHmm");
+            long start = WebAgent.GetTimestamps(startTime),
+             endTime = WebAgent.GetTimestamps(startTime.AddMinutes(1).AddSeconds(-15)),
+             openTime = WebAgent.GetTimestamps(startTime.AddMinutes(1));
+
+            this.handler?.SaveStepTime(this.lotteryCode, new StepTimeModel(betIndex, openTime, start, endTime));
+
+            _lastIndex = index;
         }
     }
 }

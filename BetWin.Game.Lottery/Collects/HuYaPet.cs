@@ -13,6 +13,9 @@ using System.Text;
 
 namespace BetWin.Game.Lottery.Collects
 {
+    /// <summary>
+    /// 虎牙宠物马拉松 2分钟一期
+    /// </summary>
     [Description("宠物马拉松")]
     public class HuYaPet : CollectProviderBase
     {
@@ -45,8 +48,7 @@ namespace BetWin.Game.Lottery.Collects
             pet[]? pets = JsonConvert.DeserializeObject<pet[]>(result);
             if (pets == null) yield break;
 
-            this.handler?.SaveStepTime(this.lotteryCode, new StepTimeModel());
-
+          
             foreach (var pet in pets)
             {
                 if (pet.date == null || pet.date.Length != 2) continue;
@@ -60,8 +62,16 @@ namespace BetWin.Game.Lottery.Collects
                         this.handler?.SaveIndexData(this.lotteryCode, index, pet.Odds.ToDictionary(t => this.getNumber(t.Key), t => t.Value));
                     }
                 }
-                if (pet.locList == null || pet.locList.Length != 1) continue;
+                if (pet.locList == null) continue;
 
+                // 当前的开奖期
+                if(pet.locList.Length == 0)
+                {
+                    // 虎牙需要额外传递真实的开奖时间
+                    //this.handler?.SaveStepTime(this.lotteryCode, new StepTimeModel());
+                }
+
+                if (pet.locList.Length != 1) continue;
                 if (openTime > DateTime.Now) openTime = openTime.AddYears(-1);
                 string number = this.getNumber(pet.locList[0]);
 

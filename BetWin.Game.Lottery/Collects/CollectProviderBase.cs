@@ -15,9 +15,9 @@ namespace BetWin.Game.Lottery.Collects
     public abstract class CollectProviderBase
     {
         /// <summary>
-        /// 彩种代码
+        /// 彩种代码（使用彩种ID）
         /// </summary>
-        public string lotteryCode { get; set; } = "";
+        public int lotteryCode { get; set; } = 0;
 
         protected ILotteryHandler? handler => IocCollection.GetService<ILotteryHandler>();
 

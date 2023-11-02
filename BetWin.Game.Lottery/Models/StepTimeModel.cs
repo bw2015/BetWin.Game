@@ -9,35 +9,36 @@ namespace BetWin.Game.Lottery.Models
     /// <summary>
     /// 局局乐的开奖时间
     /// </summary>
-    public struct StepTimeModel
+    public class StepTimeModel
     {
-        public StepTimeModel(long startTime, long endTime, long openTime, string? index = null)
+        public StepTimeModel(string index, long openTime, long startTime, long? endTime = null)
         {
+            this.index = index;
+            this.openTime = openTime;
             this.startTime = startTime;
             this.endTime = endTime;
-            this.openTime = openTime;
-            this.index = index;
         }
 
         /// <summary>
-        /// 当局的开始时间（可投注时间）
+        /// 期号
         /// </summary>
-        public long startTime;
-
-        /// <summary>
-        /// 当局的封盘时间
-        /// </summary>
-        public long endTime;
+        public string index { get; set; }
 
         /// <summary>
         /// 当前期的开奖时间
         /// </summary>
-        public long openTime;
+        public long openTime { get; set; }
 
         /// <summary>
-        /// 期号（不一定有）
+        /// 当局的开始时间（可投注时间）
         /// </summary>
-        public string? index;
+        public long startTime { get; set; }
+
+        /// <summary>
+        /// 当局的封盘时间（如果不设置的话，则使用开奖时间减去封单时间）
+        /// </summary>
+        public long? endTime { get; set; }
+
 
         public static implicit operator bool(StepTimeModel stepTime)
         {

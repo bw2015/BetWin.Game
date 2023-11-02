@@ -81,7 +81,7 @@ namespace BetWin.Game.Lottery.Collects
             };
 
             var playTime = this.getPlayTime(client, headers);
-            this.handler?.SaveStepTime(this.lotteryCode ?? string.Empty, playTime);
+            this.handler?.SaveStepTime(this.lotteryCode, playTime);
 
             // 如果当前到了开奖时间则获取实时接口
             //Console.WriteLine($"{playTime.endTime} < {WebAgent.GetTimestamps()} => {playTime.endTime < WebAgent.GetTimestamps()}");
@@ -163,11 +163,11 @@ namespace BetWin.Game.Lottery.Collects
 
             JObject info = JObject.Parse(result);
 
-            return new StepTimeModel(info["gameStartTime"]?.Value<long>() ?? 0L,
-                info["gameEndTime"]?.Value<long>() ?? 0L,
-                info["gameResultTime"]?.Value<long>() ?? 0L,
-                WebAgent.GetTimestamps(info["gameStartTime"]?.Value<long>() ?? 0L).ToString("yyyyMMddHHmm"));
-
+            string betIndex = WebAgent.GetTimestamps(info["gameStartTime"]?.Value<long>() ?? 0L).ToString("yyyyMMddHHmm");
+            long startTime = info["gameStartTime"]?.Value<long>() ?? 0L,
+                  endTime = info["gameEndTime"]?.Value<long>() ?? 0L,
+                openTime = info["gameResultTime"]?.Value<long>() ?? 0L;
+            return new StepTimeModel(betIndex, openTime, startTime, endTime);
         }
 
         private CollectData getPlayUserResult(HttpClient client, StepTimeModel time, Dictionary<string, string> headers)

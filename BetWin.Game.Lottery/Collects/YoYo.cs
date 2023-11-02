@@ -68,10 +68,11 @@ namespace BetWin.Game.Lottery.Collects
 
             // 45秒的时候开奖
             long start = WebAgent.GetTimestamps(DateTime.Now.AddSeconds(DateTime.Now.Second * -1)),
-                end = WebAgent.GetTimestamps(DateTime.Now.AddSeconds(DateTime.Now.Second * -1).AddSeconds(45));
-            string betIndex = DateTime.Now.ToString("yyyyMMddHHmm");
+                // 固定写死的开奖时间（增加45秒）
+                open = start + 45 * 1000;   
+            string betIndex = WebAgent.GetTimestamps(start).ToString("yyyyMMddHHmm");
 
-            this.handler?.SaveStepTime(this.lotteryCode, new StepTimeModel(start, end, end, betIndex));
+            this.handler?.SaveStepTime(this.lotteryCode, new StepTimeModel(betIndex, open, start));
         }
 
     }
