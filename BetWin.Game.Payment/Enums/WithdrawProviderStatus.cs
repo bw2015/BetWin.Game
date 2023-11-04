@@ -10,25 +10,25 @@ namespace BetWin.Game.Payment.Enums
     public enum WithdrawProviderStatus : byte
     {
         /// <summary>
-        /// 不需要变更状态
+        /// 状态未知，用于代付接口发生异常的情况
         /// </summary>
-        None = 0,
+        Unknow = 0,
         /// <summary>
-        /// 提交成功
+        /// 代付请求提交成功（对应订单状态为付款中）
         /// </summary>
-        SubmitSuccess = 1,
+        RequestSuccess = 1,
         /// <summary>
-        /// 提交失败
+        /// 代付订单提交失败（对应订单状态不改变）
         /// </summary>
-        SubmitFaild = 2,
+        RequestFaild = 2,
 
         /// <summary>
         /// 付款成功（订单完成）
         /// </summary>
-        PaymentSuccess = 3,
+        Success = 3,
         /// <summary>
         /// 付款失败（订单完成，来自回调通知）
         /// </summary>
-        PaymentFaild = 4
+        Faild = 4
     }
 }

@@ -21,7 +21,7 @@ namespace BetWin.Game.Payment.Withdraws
                 orderId = request.orderId,
                 currency = request.currency,
                 amount = request.amount,
-                status = WithdrawProviderStatus.PaymentSuccess
+                status = WithdrawProviderStatus.Success
             };
         }
 
@@ -31,7 +31,7 @@ namespace BetWin.Game.Payment.Withdraws
             {
                 OrderID = request.orderId,
                 TradeNo = request.tradeNo,
-                Status = WithdrawProviderStatus.PaymentSuccess
+                Status = WithdrawProviderStatus.Success
             };
         }
     }

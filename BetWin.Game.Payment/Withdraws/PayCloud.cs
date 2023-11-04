@@ -113,7 +113,7 @@ namespace BetWin.Game.Payment.Withdraws
 
                 return new WithdrawResponse()
                 {
-                    status = WithdrawProviderStatus.SubmitSuccess,
+                    status = WithdrawProviderStatus.RequestSuccess,
                     currency = PaymentCurrency.CNY,
                     msg = strErrorText,
                     amount = request.amount,
@@ -125,7 +125,7 @@ namespace BetWin.Game.Payment.Withdraws
             {
                 return new WithdrawResponse()
                 {
-                    status = WithdrawProviderStatus.SubmitFaild,
+                    status = WithdrawProviderStatus.RequestFaild,
                     amount = request.amount,
                     orderId = request.orderId,
                     currency = PaymentCurrency.CNY,
@@ -193,13 +193,13 @@ namespace BetWin.Game.Payment.Withdraws
                             TradeNo = request.orderId,
                             Status = orderResponse.orderInfo.orderState switch
                             {
-                                OrderStateEnum.Succeed => WithdrawProviderStatus.PaymentSuccess,
-                                OrderStateEnum.CallbackSuccessful => WithdrawProviderStatus.PaymentSuccess,
-                                OrderStateEnum.Callbackfeated => WithdrawProviderStatus.PaymentSuccess,
+                                OrderStateEnum.Succeed => WithdrawProviderStatus.Success,
+                                OrderStateEnum.CallbackSuccessful => WithdrawProviderStatus.Success,
+                                OrderStateEnum.Callbackfeated => WithdrawProviderStatus.Success,
 
-                                OrderStateEnum.Fail => WithdrawProviderStatus.PaymentFaild,
+                                OrderStateEnum.Fail => WithdrawProviderStatus.Faild,
 
-                                _ => WithdrawProviderStatus.None
+                                _ => WithdrawProviderStatus.Unknow
                             }
                         };
                     }
