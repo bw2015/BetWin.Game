@@ -78,6 +78,7 @@ namespace BetWin.Game.API.Handlers
         /// </summary>
         public abstract Dictionary<GameCurrency, string> Currencies { get; }
 
+
         /// <summary>
         /// 转换币值（专用于千单位币种转换）
         /// </summary>
@@ -183,7 +184,7 @@ namespace BetWin.Game.API.Handlers
             try
             {
                 result = this.RequestAPI(request);
-                if (!result) throw new Exception(result);
+                //if (!result) throw new Exception(result);
                 return response = new GameResponse(result, this.GetResultCode(result, out string message), message, (int)sw.ElapsedMilliseconds, request);
             }
             catch (Exception ex)
@@ -195,7 +196,7 @@ namespace BetWin.Game.API.Handlers
                 // 写入API请求日志
                 Console.WriteLine($"======== {DateTime.Now:yyyy-MM-dd HH:mm:ss} ========");
                 Console.WriteLine(request.Url);
-                Console.WriteLine(response.ToJson());
+                Console.WriteLine(response.ToJson());                
             }
         }
 
@@ -226,10 +227,5 @@ namespace BetWin.Game.API.Handlers
             return name;
         }
 
-        [Obsolete("临时方法")]
-        public object ToSettingObject()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

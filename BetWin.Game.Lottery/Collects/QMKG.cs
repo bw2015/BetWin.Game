@@ -81,7 +81,7 @@ namespace BetWin.Game.Lottery.Collects
             };
 
             var playTime = this.getPlayTime(client, headers);
-            this.handler?.SaveStepTime(this.lotteryCode, playTime);
+            this.handler?.SaveIndexTime(this.lotteryCode, playTime);
 
             // 如果当前到了开奖时间则获取实时接口
             //Console.WriteLine($"{playTime.endTime} < {WebAgent.GetTimestamps()} => {playTime.endTime < WebAgent.GetTimestamps()}");

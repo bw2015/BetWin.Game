@@ -72,7 +72,7 @@ namespace BetWin.Game.Lottery.Collects
                 open = start + 45 * 1000;   
             string betIndex = WebAgent.GetTimestamps(start).ToString("yyyyMMddHHmm");
 
-            this.handler?.SaveStepTime(this.lotteryCode, new StepTimeModel(betIndex, open, start));
+            this.handler?.SaveIndexTime(this.lotteryCode, new StepTimeModel(betIndex, open, start));
         }
 
     }

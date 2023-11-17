@@ -40,11 +40,11 @@ namespace BetWin.Game.Lottery.Plays.Smart
 
         protected override Odds DefaultOdds => new Dictionary<string, decimal>()
         {
-            { FOX, Math.Round(1000M/424.5M,2) },
-            { DOG,Math.Round(1000M/290M,2) },
-            { OX,Math.Round(1000M/174M,2) },
-            { SHEEP,Math.Round(1000M/72.5M,2) },
-            { SNAKE,Math.Round(1000M/29M,2) }
+            { FOX, 2 },
+            { DOG,2 },
+            { OX,32 },
+            { SHEEP,12 },
+            { SNAKE,4 }
         };
 
         protected override bool CheckBetContent(string content)

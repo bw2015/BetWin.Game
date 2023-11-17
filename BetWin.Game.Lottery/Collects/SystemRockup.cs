@@ -103,7 +103,7 @@ namespace BetWin.Game.Lottery.Collects
              endTime = WebAgent.GetTimestamps(startTime.AddMinutes(1).AddSeconds(-15)),
              openTime = WebAgent.GetTimestamps(startTime.AddMinutes(1));
 
-            this.handler?.SaveStepTime(this.lotteryCode, new StepTimeModel(betIndex, openTime, start, endTime));
+            this.handler?.SaveIndexTime(this.lotteryCode, new StepTimeModel(betIndex, openTime, start, endTime));
 
             _lastIndex = index;
         }

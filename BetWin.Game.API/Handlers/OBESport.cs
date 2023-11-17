@@ -413,7 +413,7 @@ namespace BetWin.Game.API.Handlers
             }
         }
 
-        private T Post<T>(APIMethod method, string path, Dictionary<string, object> data, out GameResultCode code, string? gateway = null)
+        private T Post<T>(APIMethod method, string path, Dictionary<string, object> data, out GameResultCode code, string? gateway = null) where T : class
         {
             gateway ??= this.Gateway;
             GameRequest request = new GameRequest()
