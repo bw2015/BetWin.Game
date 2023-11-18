@@ -11,6 +11,7 @@ using SP.StudioCore.Net.Http;
 using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace BetWin.Game.API.Handlers
 {
@@ -39,7 +40,7 @@ namespace BetWin.Game.API.Handlers
         {
         }
 
-        public override Dictionary<GameLanguage, string> Languages => throw new NotImplementedException();
+        public override Dictionary<GameLanguage, string> Languages => new Dictionary<GameLanguage, string>();
 
         public override Dictionary<GameCurrency, string> Currencies => new Dictionary<GameCurrency, string>() {
             { GameCurrency.CNY,"RMB"}
@@ -47,12 +48,33 @@ namespace BetWin.Game.API.Handlers
 
         public override BalanceResponse Balance(BalanceModel request)
         {
-            throw new NotImplementedException();
+            balance balance = this.Post<balance>(APIMethod.Balance, $"/api/v2/balance/?LoginName={request.PlayerName}", null, out GameResultCode code, out string message);
+            return new BalanceResponse(code)
+            {
+                Balance = balance?.results?.FirstOrDefault()?.balance ?? 0,
+            };
         }
 
         public override CheckTransferResponse CheckTransfer(CheckTransferModel request)
         {
-            throw new NotImplementedException();
+            checkTransfer checkTransfer = this.Post<checkTransfer>(APIMethod.CheckTransfer, $"/api/v2/transfer-status/?reference_no={request.OrderID}", null, out GameResultCode code, out string message);
+            checkTransferResult? checkTransferResult = checkTransfer?.results?.FirstOrDefault();
+
+            CheckTransferResponse result = new CheckTransferResponse(code)
+            {
+                TransferID = checkTransferResult?.partner_reference_no ?? string.Empty,
+                Money = checkTransferResult?.amount ?? 0,
+                Status = GameAPITransferStatus.Unknow
+            };
+            if (checkTransferResult?.status == "success")
+            {
+                result.Status = GameAPITransferStatus.Success;
+            }
+            else if (code != GameResultCode.Exception)
+            {
+                result.Status = GameAPITransferStatus.Faild;
+            }
+            return result;
         }
 
         public override OrderResult GetOrder(QueryOrderModel request)
@@ -104,7 +126,30 @@ namespace BetWin.Game.API.Handlers
 
         public override TransferResponse Transfer(TransferModel request)
         {
-            throw new NotImplementedException();
+            string transferId = request.OrderID;
+            string action = request.Money > 0 ? "deposit" : "withdraw";
+            Dictionary<string, object> data = new Dictionary<string, object>()
+            {
+                {"member",request.PlayerName },
+                {"operator_id",this.partner_id },
+                {"amount",Math.Abs(request.Money) },
+                {"reference_no",transferId }
+            };
+            transfer transfer = this.Post<transfer>(APIMethod.Transfer, $"/api/v2/{action}/", data, out GameResultCode code, out string message);
+            return new TransferResponse(code)
+            {
+                Money = transfer?.amount ?? 0,
+                OrderID = request.OrderID,
+                PlayerName = transfer?.member ?? request.PlayerName,
+                TransferID = transfer?.reference_no ?? string.Empty,
+                Balance = transfer?.balance_amount,
+                Status = code switch
+                {
+                    GameResultCode.Success => GameAPITransferStatus.Success,
+                    GameResultCode.Exception => GameAPITransferStatus.Unknow,
+                    _ => GameAPITransferStatus.Faild
+                }
+            };
         }
 
         protected override GameResultCode GetResultCode(string result, out string message)
@@ -131,7 +176,7 @@ namespace BetWin.Game.API.Handlers
             };
         }
 
-        private T Post<T>(APIMethod method, string url, Dictionary<string, object> data, out GameResultCode gameCode, out string message)
+        private T Post<T>(APIMethod method, string url, Dictionary<string, object>? data, out GameResultCode gameCode, out string message)
         {
             url = url.StartsWith("http") ? url : $"{this.gateway}{url}";
             GameResponse response = this.Request(new GameRequest()
