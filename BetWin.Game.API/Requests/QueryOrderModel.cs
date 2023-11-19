@@ -20,10 +20,5 @@
         /// 开始时间(13位时间戳)
         /// </summary>
         public long StartTime { get; set; }
-
-        /// <summary>
-        /// 结束时间(13位时间戳)
-        /// </summary>
-        public long EndTime { get; set; }
     }
 }

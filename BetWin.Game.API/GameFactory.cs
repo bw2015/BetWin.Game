@@ -21,5 +21,15 @@ namespace BetWin.Game.API
             if (handlerType == null) return null;
             return (IGameHandler)Activator.CreateInstance(handlerType, new[] { setting });
         }
+
+        /// <summary>
+        /// 获取采集的配置信息
+        /// </summary>
+        public static IGameCollect? GetCollect(GameType type)
+        {
+            Type handlerType = Assembly.GetAssembly(typeof(GameFactory)).GetType($"{typeof(GameFactory).Namespace}.Handlers.{type}");
+            if (handlerType == null) return null;
+            return (IGameCollect)Activator.CreateInstance(handlerType, new[] { "{}" });
+        }
     }
 }

@@ -28,7 +28,7 @@ namespace BetWin.Game.API.Handlers
         [Description("商户号")]
         public string merchant { get; set; }
 
-
+        public override int CollectDelay => 10 * 1000;
 
         public OBESport(string jsonString) : base(jsonString)
         {
@@ -80,6 +80,7 @@ namespace BetWin.Game.API.Handlers
             {GameCurrency.THB,"26" },
             {GameCurrency.BND,"27" },
         };
+
 
         public override BalanceResponse Balance(BalanceModel request)
         {
@@ -135,16 +136,17 @@ namespace BetWin.Game.API.Handlers
             // 2.查询截至时间为当前时间5分钟前
             // 3.每次查询时间区间为30分钟以内
 
-            long now = WebAgent.GetTimestamp(DateTime.Now.AddMinutes(-5)),
-                beginTime = WebAgent.GetTimestamp(DateTime.Now.AddDays(-30)),
-               startTime = request.StartTime / 1000,
-               endTime = Math.Min(now, request.EndTime / 1000);
+
+            long now = WebAgent.GetTimestamp(DateTime.Now.AddMinutes(-5.5)),
+                beginTime = WebAgent.GetTimestamp(DateTime.Now.AddDays(-7)),
+               startTime = request.StartTime / 1000;
+
+            // 初始值
             if (startTime < beginTime)
             {
                 startTime = beginTime;
-                endTime = startTime + 30 * 60;
             }
-            if (endTime - startTime > 30 * 60) endTime = Math.Min(now, startTime + 30 * 60);
+            long endTime = Math.Min(now, startTime + 30 * 60);
             if (startTime > endTime) startTime = endTime - 60;
 
             long orderId = 0;
@@ -390,6 +392,7 @@ namespace BetWin.Game.API.Handlers
                         "processing" => GameResultCode.TransferProgress,
                         "can only query bets made five minutes ago" => GameResultCode.TimeOverflow,
                         "the query range of bet slips does not exceed 30 minutes" => GameResultCode.TimeOverflow,
+                        "illegal start_time" => GameResultCode.ParameterInvalid,
                         _ => GameResultCode.Error
                     };
                 }

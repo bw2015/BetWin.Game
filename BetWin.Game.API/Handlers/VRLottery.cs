@@ -47,6 +47,7 @@ namespace BetWin.Game.API.Handlers
 
         public override Dictionary<GameCurrency, string> Currencies => new Dictionary<GameCurrency, string>();
 
+
         public override BalanceResponse Balance(BalanceModel request)
         {
             throw new NotImplementedException();

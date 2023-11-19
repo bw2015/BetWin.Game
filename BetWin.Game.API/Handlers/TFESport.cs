@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Web;
 
 namespace BetWin.Game.API.Handlers
 {
@@ -35,6 +36,8 @@ namespace BetWin.Game.API.Handlers
         /// </summary>
         [Description("游戏地址")]
         public string launch { get; set; }
+
+        public override int CollectDelay => 10 * 1000;
 
         public TFESport(string jsonString) : base(jsonString)
         {
@@ -79,7 +82,106 @@ namespace BetWin.Game.API.Handlers
 
         public override OrderResult GetOrder(QueryOrderModel request)
         {
-            throw new NotImplementedException();
+            DateTime beginTime = DateTime.Now.AddDays(-7);
+            DateTime startTime = WebAgent.GetTimestamps(request.StartTime);
+            if (startTime < beginTime) startTime = beginTime;
+            DateTime endTime = startTime.AddMinutes(30);
+            DateTime now = DateTime.Now.AddMinutes(-2);
+
+            if (endTime > now) endTime = now;
+            if (startTime > endTime) startTime = endTime.AddMinutes(-5);
+
+            int page_size = 1000;
+            string from_modified_datetime = HttpUtility.UrlEncode(startTime.ToString("yyyy-MM-ddTHH:mm:ss+08:00"));
+            string to_modified_datetime = HttpUtility.UrlEncode(endTime.ToString("yyyy-MM-ddTHH:mm:ss+08:00"));
+
+            string path = $"/api/v2/bet-transaction/?page_size={page_size}&from_modified_datetime={from_modified_datetime}&to_modified_datetime={to_modified_datetime}";
+            OrderResult orderResult = new OrderResult(GameResultCode.Success)
+            {
+                data = new List<OrderData>(),
+                startTime = WebAgent.GetTimestamps(startTime),
+                endTime = WebAgent.GetTimestamps(endTime)
+            };
+            order order = this.Post<order>(APIMethod.GetOrder, path, null, out GameResultCode code, out string message);
+            Dictionary<string, GameCurrency> currency = this.Currencies.ToDictionary(t => t.Value, t => t.Key);
+            foreach (var item in order.results)
+            {
+                GameAPIOrderStatus status = GameAPIOrderStatus.Wait;
+                decimal betMoney = item.amount;
+                decimal money = 0;
+                switch (item.settlement_status)
+                {
+                    case "confirmed":
+                        status = GameAPIOrderStatus.Wait;
+                        break;
+                    case "cancelled":
+                        status = GameAPIOrderStatus.Return;
+                        break;
+                    case "settled":
+                        switch (item.result_status)
+                        {
+                            case "WIN":
+                                status = GameAPIOrderStatus.Win;
+                                if (item.earnings != null) money = item.earnings.Value - betMoney;
+                                break;
+                            case "LOSS":
+                                status = GameAPIOrderStatus.Lose;
+                                if (item.earnings != null) money = item.earnings.Value;
+                                break;
+                            case "DRAW":
+                            case "CANCELLED":
+                                status = GameAPIOrderStatus.Return;
+                                break;
+                        }
+                        break;
+                }
+                decimal betAmount = Math.Min(betMoney, Math.Abs(money));
+
+                OrderData orderData = new OrderData()
+                {
+                    orderId = item.id,
+                    playerName = item.member_code ?? string.Empty,
+                    currency = currency.Get(item.currency),
+                    createTime = WebAgent.GetTimestamps(item.date_created, TimeSpan.FromHours(0)),
+                    settleTime = item.settlement_datetime == null ? 0 : WebAgent.GetTimestamps(item.settlement_datetime.Value, TimeSpan.FromHours(0)),
+                    gameCode = item.game_type_id ?? string.Empty,
+
+                    status = status,
+                    betMoney = item.amount,
+                    betAmount = betAmount,
+                    money = money,
+
+                    rawData = item.ToJson(),
+                    hash = string.Concat(item.id, ":", WebAgent.GetTimestamps(item.modified_datetime))
+                };
+
+                if (item.is_combo)
+                {
+                    if (item.tickets != null)
+                    {
+                        foreach (var result in item.tickets)
+                        {
+                            //this.GameHandler?.SaveGameCode(this.Type, result.game_type_id, Language.ENG, result.game_type_name);
+                        }
+                    }
+                    // 如果是小游戏
+                    if (item.tickets?.Length == 1)
+                    {
+                        orderData.gameCode = item.tickets?[0].game_type_id ?? string.Empty;
+                    }
+                    else
+                    {
+                        orderData.gameCode = $"{item.tickets?.Length}x1";
+                    }
+                }
+                else
+                {
+                    //this.GameHandler?.SaveGameCode(this.Type, item.game_type_id, Language.ENG, item.game_type_name);
+                }
+
+                orderResult.data.Add(orderData);
+            }
+            return orderResult;
         }
 
         public override LoginResponse Login(LoginModel request)

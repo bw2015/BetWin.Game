@@ -125,7 +125,7 @@ namespace BetWin.Game.API.Handlers
         public override OrderResult GetOrder(QueryOrderModel request)
         {
             DateTime startDate = WebAgent.GetTimestamps(request.StartTime);
-            DateTime endDate = WebAgent.GetTimestamps(request.EndTime);
+            DateTime endDate = startDate.AddMinutes(30);
 
             if (endDate > DateTime.Now.AddMinutes(5)) endDate = DateTime.Now.AddMinutes(-5);
             if (endDate - startDate > TimeSpan.FromDays(1))

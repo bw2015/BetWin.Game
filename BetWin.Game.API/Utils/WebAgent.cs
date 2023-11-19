@@ -50,5 +50,13 @@ namespace BetWin.Game.API.Utils
         {
             return WebAgent.GetTimestamps(dateTime) / 1000L;
         }
+
+        /// <summary>
+        /// 获取时间戳（指定时区）
+        /// </summary>
+        internal static long GetTimestamps(DateTime time, TimeSpan offsetTime)
+        {
+            return (time.Subtract(offsetTime).Ticks - 621355968000000000) / 10000;
+        }
     }
 }

@@ -16,6 +16,7 @@ namespace BetWin.Game.API.Handlers
         public Dictionary<GameLanguage, string> Languages { get; }
 
         public Dictionary<GameCurrency, string> Currencies { get; }
+           
 
         /// <summary>
         /// 注册
@@ -60,8 +61,21 @@ namespace BetWin.Game.API.Handlers
         public string Callback(HttpContextModel context);
     }
 
-    public abstract class GameBase : IGameHandler
+    /// <summary>
+    /// 采集的参数配置
+    /// </summary>
+    public interface IGameCollect
     {
+        /// <summary>
+        /// 采集的间隔时间（毫秒）
+        /// </summary>
+        public int CollectDelay { get; }
+    }
+
+    public abstract class GameBase : IGameHandler, IGameCollect
+    {
+        public GameBase() { }
+
         public GameBase(string jsonString)
         {
             if (string.IsNullOrEmpty(jsonString)) return;
@@ -211,6 +225,8 @@ namespace BetWin.Game.API.Handlers
         /// 用户名之间的分隔符
         /// </summary>
         protected virtual char UserNameSplit => '_';
+
+        public virtual int CollectDelay => 60 * 1000;
 
         protected virtual string CreateUserName(string prefix, string userName, int maxLength, int tryCount = 0)
         {

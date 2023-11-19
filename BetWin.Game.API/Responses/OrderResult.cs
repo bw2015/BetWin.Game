@@ -94,6 +94,11 @@ namespace BetWin.Game.API.Responses
         /// </summary>
         public decimal money { get; set; }
 
+        /// <summary>
+        /// 玩家的IP
+        /// </summary>
+        public string clientIp { get; set; }
+
 
         /// <summary>
         /// Hash唯一字符串，判断订单数据是否需要更新
