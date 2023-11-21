@@ -48,6 +48,11 @@ namespace BetWin.Game.Payment.Models
         /// </summary>
         public string? msg { get; set; }
 
+        /// <summary>
+        /// 前台要弹出的信息框
+        /// </summary>
+        public string? message { get; set; }
+
         public static implicit operator bool(PaymentResponse response)
         {
             return !string.IsNullOrEmpty(response?.url);
