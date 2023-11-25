@@ -74,7 +74,7 @@ namespace BetWin.Game.Lottery.Collects
                 3 => "7",
                 4 => "8",
                 5 => "6",
-                6 => "6",
+                6 => "5",
                 7 => "4",
                 8 => "3",
                 _ => monsterId.ToString()
