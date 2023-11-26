@@ -58,5 +58,13 @@ namespace BetWin.Game.API.Utils
         {
             return (time.Subtract(offsetTime).Ticks - 621355968000000000) / 10000;
         }
+
+        /// <summary>
+        /// 随机数字
+        /// </summary>
+        internal static int GetRandom(int min, int max)
+        {
+            return new Random().Next(min, max);
+        }
     }
 }
