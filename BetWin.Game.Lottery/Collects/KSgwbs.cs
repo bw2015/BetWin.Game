@@ -17,10 +17,6 @@ namespace BetWin.Game.Lottery.Collects
     {
         public string gateway { get; set; } = "https://gwbs-ks.sskjz.com/api/v1/status";
 
-        /// <summary>
-        /// 获取局号信息
-        /// </summary>
-        public string round { get; set; } = "https://gwbs-ks.sskjz.com/api/v1/status/round";
 
         public string token { get; set; } = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcGVuSWQiOiJmMTgzODNkNjYyODA3MTRmMTRiZjU3MjQ0ODFkNzNkOSIsInNlc3Npb25JZCI6ImNjMjMwNzkyLThhZjgtMTFlZS1iYjYzLTAwMTYzZTBjNGMyMCIsInYiOiIxLjAuMCIsImV4cCI6MTcwMTQ1NTk2NywiaXNzIjoic3AifQ.phlZIeXeGYd7uOO96fcA9_kmp1Uqm4W-3N_-jlO2BME";
 
