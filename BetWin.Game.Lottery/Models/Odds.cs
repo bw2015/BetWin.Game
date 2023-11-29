@@ -27,6 +27,11 @@ namespace BetWin.Game.Lottery.Models
             return odds._data;
         }
 
+        /// <summary>
+        /// 设定赔率
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="odds"></param>
         public void Add(string content, decimal odds)
         {
             if (this._data == null) { this._data = new Dictionary<string, decimal>(); }
@@ -74,10 +79,7 @@ namespace BetWin.Game.Lottery.Models
         {
             foreach (string key in odds2._data.Keys)
             {
-                if (odds1.GetOdds(key) == decimal.Zero || odds1.GetOdds(key) > odds2.GetOdds(key))
-                {
-                    odds1.Add(key, odds2._data[key]);
-                }
+                odds1.Add(key, odds2._data[key]);
             }
             return odds1;
         }
