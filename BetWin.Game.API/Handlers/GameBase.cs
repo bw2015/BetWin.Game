@@ -16,7 +16,7 @@ namespace BetWin.Game.API.Handlers
         public Dictionary<GameLanguage, string> Languages { get; }
 
         public Dictionary<GameCurrency, string> Currencies { get; }
-           
+
 
         /// <summary>
         /// 注册
@@ -210,7 +210,7 @@ namespace BetWin.Game.API.Handlers
                 // 写入API请求日志
                 Console.WriteLine($"======== {DateTime.Now:yyyy-MM-dd HH:mm:ss} ========");
                 Console.WriteLine(request.Url);
-                Console.WriteLine(response.ToJson());                
+                Console.WriteLine(response.ToJson());
             }
         }
 
@@ -228,7 +228,15 @@ namespace BetWin.Game.API.Handlers
 
         public virtual int CollectDelay => 60 * 1000;
 
-        protected virtual string CreateUserName(string prefix, string userName, int maxLength, int tryCount = 0)
+        /// <summary>
+        /// 创建用户名（转化小写）
+        /// </summary>
+        /// <param name="prefix"></param>
+        /// <param name="userName"></param>
+        /// <param name="maxLength"></param>
+        /// <param name="tryCount"></param>
+        /// <returns></returns>
+        protected virtual string CreateUserName(string prefix, string userName, int maxLength = 16, int tryCount = 0)
         {
             string name;
             if (tryCount == 0)
@@ -237,10 +245,10 @@ namespace BetWin.Game.API.Handlers
             }
             else
             {
-                name = $"{prefix}{this.UserNameSplit}{userName}{this.UserNameSplit}{tryCount}";
+                name = $"{prefix}{this.UserNameSplit}{userName}{this.UserNameSplit}{WebAgent.GetRandom(100, 999)}";
             }
             if (name.Length > maxLength) name = $"{prefix}{this.UserNameSplit}{Guid.NewGuid().ToString("N")[..(maxLength - prefix.Length - 1)]}";
-            return name;
+            return name.ToLower();
         }
 
     }
