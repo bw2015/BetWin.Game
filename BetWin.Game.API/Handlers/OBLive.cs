@@ -222,7 +222,12 @@ namespace BetWin.Game.API.Handlers
             {
                 { "loginName",request.PlayerName },
                 {"loginPassword",request.PlayerPassword },
-                {"deviceType", this.getPlatform(request.Platform) },
+                {"deviceType", request.Platform switch{
+                        GamePlatform.PC => 1,
+                        GamePlatform.Mobile => 2,
+                        _=>1
+                    } 
+                },
                 {"lang",1 },
                 {"backurl","https://localhost" },
                 {"ip",request.clientIp }
@@ -236,6 +241,9 @@ namespace BetWin.Game.API.Handlers
             };
         }
 
+        /// <summary>
+        /// 不支持退出
+        /// </summary>
         public override LogoutResponse Logout(LogoutModel request)
         {
             throw new NotImplementedException();
@@ -352,23 +360,6 @@ namespace BetWin.Game.API.Handlers
             message = result.Message;
             response<T>? response = JsonConvert.DeserializeObject<response<T>>(result);
             return response?.data;
-        }
-
-        /// <summary>
-        /// 获取平台代码
-        /// </summary>
-        private int getPlatform(GamePlatform platform)
-        {
-            //1   网页
-            //2   手机网页
-            //3   App iOS或 h5 iOS
-            //4   App Android 或h5 Android
-            //5   其他设备
-            //6   移动端 横竖合一
-            //7   移动端 横竖合一横版
-            //8   移动端 横竖合一竖版
-            if (platform.HasFlag(GamePlatform.Mobile)) return 2;
-            return 1;
         }
 
         #endregion
