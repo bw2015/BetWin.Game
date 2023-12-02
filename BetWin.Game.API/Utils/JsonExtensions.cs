@@ -27,11 +27,18 @@ namespace BetWin.Game.API.Utils
         /// <typeparam name="T"></typeparam>
         /// <param name="json"></param>
         /// <returns></returns>
-        public static T ToJson<T>(this string json)
+        public static T? ToJson<T>(this string json) where T : class
         {
             if (string.IsNullOrEmpty(json)) return default;
             if (!json.StartsWith("{") && !json.StartsWith("[")) return default;
-            return JsonConvert.DeserializeObject<T>(json);
+            try
+            {
+                return JsonConvert.DeserializeObject<T>(json);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
 

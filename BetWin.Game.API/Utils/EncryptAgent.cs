@@ -13,7 +13,7 @@ namespace BetWin.Game.API.Utils
         /// <summary>
         /// 对字符串进行MD5加密
         /// </summary>
-        /// <param name="text"></param>
+        /// <param name="input"></param>
         /// <returns>32位 大写</returns>
         public static string toMD5(this string input, Encoding? encoding = null)
         {
