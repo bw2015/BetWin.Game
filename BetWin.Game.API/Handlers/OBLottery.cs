@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace BetWin.Game.API.Handlers
 {
@@ -53,17 +54,178 @@ namespace BetWin.Game.API.Handlers
 
         public override BalanceResponse Balance(BalanceModel request)
         {
-            throw new NotImplementedException();
+            Dictionary<string, object> data = new Dictionary<string, object>
+            {
+                {"member",request.PlayerName },
+                {"merchant",this.merchant },
+                {"timestamp",WebAgent.GetTimestamps() },
+            };
+            data["sign"] = getSign(data);
+            response<balance>? balance = this.Post<balance>(APIMethod.Balance, "/boracay/api/nofreemember/balanceQuery", data, out GameResultCode code, out string message);
+            return new BalanceResponse(code)
+            {
+                Message = message,
+                Currency = request.Currency,
+                Balance = balance?.data?.amount ?? 0
+            };
         }
 
         public override CheckTransferResponse CheckTransfer(CheckTransferModel request)
         {
-            throw new NotImplementedException();
+            Dictionary<string, object> data = new Dictionary<string, object>
+            {
+                {"member",request.PlayerName },
+                {"merchant",this.merchant },
+                {"notifyId",request.OrderID },
+                {"tradeType",request.Action switch
+                    {
+                         GameAPIAction.IN => 1,
+                         GameAPIAction.OUT => 2,
+                         _ => 0
+                    }
+                },
+                {"timestamp",WebAgent.GetTimestamps() },
+            };
+            data["sign"] = getSign(data);
+            response<transferCheck>? check = this.Post<transferCheck>(APIMethod.CheckTransfer, "/boracay/api/nofreemember/balanceRecords", data, out GameResultCode code, out string message);
+
+            GameAPITransferStatus status = GameAPITransferStatus.Unknow;
+            if (code == GameResultCode.Success)
+            {
+                if (check?.data?.total == 1)
+                {
+                    status = GameAPITransferStatus.Success;
+                }
+                else
+                {
+                    status = GameAPITransferStatus.Faild;
+                }
+            }
+            return new CheckTransferResponse(code)
+            {
+                Message = message,
+                Money = check?.data?.list?.FirstOrDefault()?.amount,
+                TransferID = check?.data?.list?.FirstOrDefault()?.id ?? request.OrderID,
+                Status = status
+            };
         }
+
+        private TimeSpan Duration => TimeSpan.FromMinutes(30);
+        private DateTime begimTime => DateTime.Now.AddDays(-7);
 
         public override OrderResult GetOrder(QueryOrderModel request)
         {
-            throw new NotImplementedException();
+            DateTime startTime = WebAgent.GetTimestamps(request.StartTime);
+            if (startTime < begimTime) startTime = begimTime;
+            DateTime endTime = startTime.Add(this.Duration);
+            if (endTime > DateTime.Now) endTime = DateTime.Now;
+            if (startTime > endTime.AddMinutes(-5)) startTime = endTime.AddMinutes(-5);
+
+            long lastOrderID = 0;
+            string start = startTime.ToString("yyyy-MM-dd HH:mm:ss");
+            string end = endTime.ToString("yyyy-MM-dd HH:mm:ss");
+
+            OrderResult result = new OrderResult(GameResultCode.Success)
+            {
+                data = new List<OrderData>(),
+                startTime = WebAgent.GetTimestamps(startTime),
+                endTime = WebAgent.GetTimestamps(endTime)
+            };
+
+            while (true)
+            {
+                Dictionary<string, object> data = new Dictionary<string, object>
+                {
+                    {"startTime",start },
+                    {"endTime",end },
+                    {"merchantAccount",this.merchant },
+                    {"agency",false },
+                    {"pageSize",1000 },
+                    {"lastOrderId",lastOrderID },
+                    {"wholeFlag",true },
+                    {"sign",this.getSign($"agencyfalseendTime{end}lastOrderId{lastOrderID}merchantAccount{this.merchant}pageSize1000startTime{start}wholeFlagtrue{this.key}") }
+                };
+                string url = $"{this.gateway}/merchantdata/pull/order/all?{data.ToQueryString()}";
+                response<order[]>? response = this.Post<order[]>(APIMethod.GetOrder, url, null, out GameResultCode code, out string message);
+                if (code != GameResultCode.Success)
+                {
+                    return new OrderResult(code)
+                    {
+                        Message = message
+                    };
+                }
+
+                if (response != null)
+                {
+                    foreach (order order in response.data)
+                    {
+                        lastOrderID = order.orderId;
+                        decimal money = 0M;
+                        GameAPIOrderStatus status = GameAPIOrderStatus.Wait;
+                        switch (order.betStatus)
+                        {
+                            case 1:
+                                if (order.cancelStatus)
+                                {
+                                    status = GameAPIOrderStatus.Return;
+                                }
+                                else
+                                {
+                                    status = GameAPIOrderStatus.Wait;
+                                }
+                                break;
+                            case 2:
+                            case 3:
+                            case 5:
+                                money = order.profitAmount;
+                                if (money > 0)
+                                {
+                                    status = GameAPIOrderStatus.Win;
+                                }
+                                else if (money < 0)
+                                {
+                                    status = GameAPIOrderStatus.Lose;
+                                }
+                                else
+                                {
+                                    status = GameAPIOrderStatus.Return;
+                                }
+                                break;
+                            case 4:
+                                status = GameAPIOrderStatus.Return;
+                                break;
+                        }
+                        result.data.Add(new OrderData
+                        {
+                            orderId = lastOrderID.ToString(),
+                            category = "Lottery",
+                            createTime = WebAgent.GetTimestamps(order.betTime),
+                            gameCode = order.ticketId.ToString(),
+                            currency = order.currencyType switch
+                            {
+                                1 => GameCurrency.CNY,
+                                2 => GameCurrency.USD,
+                                3 => GameCurrency.SGD,
+                                4 => GameCurrency.MYR,
+                                5 => GameCurrency.TWD,
+                                6 => GameCurrency.VND,
+                                7 => GameCurrency.BND,
+                                _ => GameCurrency.CNY
+                            },
+                            betMoney = order.betMoney,
+                            betAmount = Math.Min(order.betMoney, Math.Abs(money)),
+                            money = money,
+                            playerName = order.memberAccount,
+                            settleTime = status == GameAPIOrderStatus.Wait ? 0 : WebAgent.GetTimestamps(order.updateAt),
+                            status = status,
+                            hash = order.GetHash(),
+                            rawData = order.ToJson()
+                        });
+                    }
+                }
+                if (response?.data.Length != 1000) break;
+            }
+            return result;
         }
 
         public override LoginResponse Login(LoginModel request)
@@ -73,7 +235,7 @@ namespace BetWin.Game.API.Handlers
                 {"member",request.PlayerName },
                 {"password",request.PlayerPassword },
                 {"merchant",this.merchant },
-                {"timestamp",WebAgent.GetTimestamps() },
+                {"timestamp",WebAgent.GetTimestamps() }
             };
             data["sign"] = getSign(data);
             data["lang"] = this.Languages.Get(request.Language);
@@ -89,19 +251,85 @@ namespace BetWin.Game.API.Handlers
 
         public override LogoutResponse Logout(LogoutModel request)
         {
-            throw new NotImplementedException();
+            Dictionary<string, object> data = new Dictionary<string, object>()
+            {
+                {"member",request.PlayerName },
+                {"merchant",this.merchant },
+                {"timestamp",WebAgent.GetTimestamps() }
+            };
+            data["sign"] = this.getSign(data);
+
+            response<logout>? logout = this.Post<logout>(APIMethod.Logout, "/boracay/api/member/offLine", data, out GameResultCode code, out string message);
+
+            return new LogoutResponse(code)
+            {
+                Message = message,
+                PlayerName = request.PlayerName
+            };
         }
 
         protected override char UserNameSplit => '0';
 
         public override RegisterResponse Register(RegisterModel request)
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < 5; i++)
+            {
+                string playerName = this.CreateUserName(request.Prefix, request.UserName, 20, i);
+                string password = this.GetType().Name.ToLower();
+                Dictionary<string, object> data = new Dictionary<string, object>()
+                {
+                   {"member",playerName},
+                    {"memberType",1 },
+                    {"password" ,password},
+                    {"merchant",this.merchant },
+                    {"doubleList",string.Empty },
+                    {"normalList",string.Empty },
+                    {"timestamp",WebAgent.GetTimestamps() },
+                };
+                data.Add("sign", getSign(data));
+                data.Add("currencyType", this.Currencies.Get(request.Currency));
+
+                response<register>? register = this.Post<register>(APIMethod.Register, "/boracay/api/member/create", data, out GameResultCode code, out string message);
+                if (code == GameResultCode.DuplicatePlayerName)
+                {
+                    continue;
+                }
+                return new RegisterResponse(code)
+                {
+                    Message = message,
+                    PlayerName = playerName,
+                    Password = password
+                };
+            }
+            return new RegisterResponse(GameResultCode.DuplicatePlayerName);
         }
 
         public override TransferResponse Transfer(TransferModel request)
         {
-            throw new NotImplementedException();
+            Dictionary<string, object> data = new Dictionary<string, object>
+            {
+                {"member",request.PlayerName },
+                {"merchantAccount",this.merchant },
+                {"transferType",request.Money>0?1:2 },
+                {"amount",Math.Abs(request.Money).ToString("#0.00") },
+                {"notifyId",request.OrderID },
+                {"timestamp",WebAgent.GetTimestamps() },
+            };
+            data["sign"] = getSign(data);
+            _ = this.Post<transfer>(APIMethod.Transfer, "/boracay/api/nofreemember/transferBalance", data, out GameResultCode code, out string message);
+            return new TransferResponse(code)
+            {
+                Message = message,
+                Money = Math.Abs(request.Money),
+                PlayerName = request.PlayerName,
+                OrderID = request.OrderID,
+                Status = code switch
+                {
+                    GameResultCode.Success => GameAPITransferStatus.Success,
+                    GameResultCode.Exception => GameAPITransferStatus.Unknow,
+                    _ => GameAPITransferStatus.Faild
+                }
+            };
         }
 
         protected override GameResultCode GetResultCode(string result, out string message)
@@ -142,22 +370,42 @@ namespace BetWin.Game.API.Handlers
         {
             using (HttpClient client = new HttpClient())
             {
-                return client.Post(request.Url, request.Data, new Dictionary<string, string>()
+                if (string.IsNullOrEmpty(request.Data))
                 {
-                    {"Content-Type","application/json" }
-                });
+                    return client.Get(request.Url, new Dictionary<string, string>());
+                }
+                else
+                {
+                    string contentType = "application/x-www-form-urlencoded";
+                    if (request.Data.StartsWith("{"))
+                    {
+                        contentType = "application/json";
+                    }
+                    return client.Post(request.Url, request.Data, new Dictionary<string, string>()
+                    {
+                        {"Content-Type",contentType }
+                    });
+                }
             }
         }
 
         #region ========  工具方法  ========
 
-        private response<T>? Post<T>(APIMethod method, string path, Dictionary<string, object> data, out GameResultCode code, out string message)
+        private response<T>? Post<T>(APIMethod method, string path, Dictionary<string, object>? data, out GameResultCode code, out string message)
         {
-            string url = $"{this.gateway}{path}";
+            string url = Regex.IsMatch(path, @"^http") ? path : $"{this.gateway}{path}";
+            string? postData = data == null ? null : data.ToJson();
+            switch (method)
+            {
+                case APIMethod.Login:
+                case APIMethod.Logout:
+                    postData = data?.ToQueryString();
+                    break;
+            }
             GameResponse result = this.Request(new GameRequest()
             {
                 Url = url,
-                Data = data.ToJson(),
+                Data = postData ?? string.Empty,
                 Method = method
             });
             code = (GameResultCode)result;
@@ -174,6 +422,7 @@ namespace BetWin.Game.API.Handlers
                 value += $"{item.Key}{item.Value}";
             }
             value += this.key;
+            Console.WriteLine(value);
             return value.toMD5().ToLower();
         }
 
@@ -225,11 +474,26 @@ namespace BetWin.Game.API.Handlers
 
         }
 
+        class logout
+        {
+
+        }
+
+        class register
+        {
+
+        }
+
         class balance
         {
             public string member { get; set; }
 
             public decimal amount { get; set; }
+        }
+
+        class transfer
+        {
+
         }
 
         class transferCheck
