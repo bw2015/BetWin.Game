@@ -1,4 +1,5 @@
 ﻿using BetWin.Game.Payment.Models;
+using BetWin.Game.Payment.Utils;
 using Microsoft.AspNetCore.Http;
 using SP.StudioCore.Net.Http;
 using System;
@@ -9,24 +10,21 @@ using System.Text;
 namespace BetWin.Game.Payment.Providers
 {
     /// <summary>
-    /// 联系客服的代客充值
+    /// 银行转账
     /// </summary>
-    [Description("代客充值")]
-    internal class VIPPayment : PaymentProviderBase
+    [Description("银行转账")]
+    internal class BankTransfer : PaymentProviderBase
     {
-        /// <summary>
-        /// 需要弹出的提示框
-        /// </summary>
-        [Description("提示信息")]
-        public string message { get; set; }
+        [Description("开户银行")]
+        public string Bank { get; set; }
 
-        /// <summary>
-        /// 跳转地址
-        /// </summary>
-        [Description("客服连接")]
-        public string url { get; set; }
+        [Description("收款人")]
+        public string Name { get; set; }
 
-        public VIPPayment(string setting) : base(setting)
+        [Description("账号")]
+        public string Account { get; set; }
+
+        public BankTransfer(string setting) : base(setting)
         {
         }
 
@@ -37,16 +35,15 @@ namespace BetWin.Game.Payment.Providers
 
         protected override PaymentResponse payment(PaymentRequest request, out string url, out string postData, out HttpClientResponse result)
         {
-            postData = string.Empty;
+            postData = new { this.Bank, this.Name, this.Account }.ToJson();
             result = new HttpClientResponse();
-            url = this.url;
+            url = new { Bank, Name, Account }.ToJson();
             return new PaymentResponse()
             {
                 provider = this.GetType().Name,
-                orderId = request.orderId,
                 url = url,
-                amount = request.amount,
-                message = message
+                orderId = request.orderId,
+                amount = request.amount
             };
         }
     }

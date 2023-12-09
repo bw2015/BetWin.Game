@@ -53,6 +53,11 @@ namespace BetWin.Game.Payment.Models
         /// </summary>
         public string? message { get; set; }
 
+        /// <summary>
+        /// 当前的供应商类型
+        /// </summary>
+        public string? provider { get; set; }
+
         public static implicit operator bool(PaymentResponse response)
         {
             return !string.IsNullOrEmpty(response?.url);
