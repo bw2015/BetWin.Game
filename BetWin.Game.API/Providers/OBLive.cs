@@ -13,7 +13,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 
-namespace BetWin.Game.API.Handlers
+namespace BetWin.Game.API.Providers
 {
     [Description("OB真人")]
     internal class OBLive : GameBase

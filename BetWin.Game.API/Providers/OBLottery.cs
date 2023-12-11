@@ -13,7 +13,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace BetWin.Game.API.Handlers
+namespace BetWin.Game.API.Providers
 {
     internal class OBLottery : GameBase
     {

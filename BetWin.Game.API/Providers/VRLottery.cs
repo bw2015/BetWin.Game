@@ -13,7 +13,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 
-namespace BetWin.Game.API.Handlers
+namespace BetWin.Game.API.Providers
 {
     /// <summary>
     /// VR彩票

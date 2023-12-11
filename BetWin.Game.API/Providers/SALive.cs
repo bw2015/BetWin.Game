@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml.Linq;
 
-namespace BetWin.Game.API.Handlers
+namespace BetWin.Game.API.Providers
 {
     /// <summary>
     /// SA真人

@@ -14,7 +14,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace BetWin.Game.API.Handlers
+namespace BetWin.Game.API.Providers
 {
     [Description("OB电竞")]
     public class OBESport : GameBase

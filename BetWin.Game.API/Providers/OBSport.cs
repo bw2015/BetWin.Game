@@ -15,7 +15,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 
-namespace BetWin.Game.API.Handlers
+namespace BetWin.Game.API.Providers
 {
     [Description("OB体育")]
     public class OBSport : GameBase

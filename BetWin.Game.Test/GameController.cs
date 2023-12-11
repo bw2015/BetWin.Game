@@ -1,6 +1,6 @@
 ﻿using BetWin.Game.API;
 using BetWin.Game.API.Enums;
-using BetWin.Game.API.Handlers;
+using BetWin.Game.API.Providers;
 using BetWin.Game.API.Requests;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -17,9 +17,9 @@ namespace BetWin.Game.Test
     [Route("[controller]/[action]"), ApiController]
     public class GameController : ControllerBase
     {
-        private IGameHandler GetHandler(GameType game, string setting)
+        private IGameProvider GetHandler(GameType game, string setting)
         {
-            IGameHandler? handler = GameFactory.GetGame(game, setting);
+            IGameProvider? handler = GameFactory.GetGame(game, setting);
             if (handler == null)
             {
                 throw new Exception($"找不到游戏类型 => {game}");
@@ -94,7 +94,7 @@ namespace BetWin.Game.Test
         [HttpPost]
         public IActionResult Login([FromQuery] GameType game, [FromForm] string setting, [FromJson] LoginModel model)
         {
-            IGameHandler? handler = this.GetHandler(game, setting);
+            IGameProvider? handler = this.GetHandler(game, setting);
             var response = handler.Login(model);
             return new JsonResult(response);
         }
@@ -102,7 +102,7 @@ namespace BetWin.Game.Test
         [HttpPost]
         public IActionResult Logout([FromQuery] GameType game, [FromForm] string setting, [FromJson] LogoutModel model)
         {
-            IGameHandler? handler = this.GetHandler(game, setting);
+            IGameProvider? handler = this.GetHandler(game, setting);
             var response = handler.Logout(model);
             return new JsonResult(response);
         }
@@ -110,7 +110,7 @@ namespace BetWin.Game.Test
         [HttpPost]
         public IActionResult Register([FromQuery] GameType game, [FromForm] string setting, [FromJson] RegisterModel model)
         {
-            IGameHandler? handler = this.GetHandler(game, setting);
+            IGameProvider? handler = this.GetHandler(game, setting);
             var response = handler.Register(model);
             return new JsonResult(response);
         }
@@ -118,7 +118,7 @@ namespace BetWin.Game.Test
         [HttpPost]
         public IActionResult Balance([FromQuery] GameType game, [FromForm] string setting, [FromJson] BalanceModel model)
         {
-            IGameHandler? handler = this.GetHandler(game, setting);
+            IGameProvider? handler = this.GetHandler(game, setting);
             var response = handler.Balance(model);
             return new JsonResult(response);
         }
@@ -126,7 +126,7 @@ namespace BetWin.Game.Test
         [HttpPost]
         public IActionResult Transfer([FromQuery] GameType game, [FromForm] string setting, [FromJson] TransferModel model)
         {
-            IGameHandler? handler = this.GetHandler(game, setting);
+            IGameProvider? handler = this.GetHandler(game, setting);
             var response = handler.Transfer(model);
             return new JsonResult(response);
         }
@@ -134,7 +134,7 @@ namespace BetWin.Game.Test
         [HttpPost]
         public IActionResult CheckTransfer([FromQuery] GameType game, [FromForm] string setting, [FromJson] CheckTransferModel model)
         {
-            IGameHandler? handler = this.GetHandler(game, setting);
+            IGameProvider? handler = this.GetHandler(game, setting);
             var response = handler.CheckTransfer(model);
             return new JsonResult(response);
         }
@@ -142,7 +142,7 @@ namespace BetWin.Game.Test
         [HttpPost]
         public IActionResult QueryOrder([FromQuery] GameType game, [FromForm] string setting, [FromJson] QueryOrderModel model)
         {
-            IGameHandler? handler = this.GetHandler(game, setting);
+            IGameProvider? handler = this.GetHandler(game, setting);
             var response = handler.GetOrder(model);
             return new JsonResult(response);
         }

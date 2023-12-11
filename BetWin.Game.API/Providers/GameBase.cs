@@ -4,14 +4,15 @@ using BetWin.Game.API.Requests;
 using BetWin.Game.API.Responses;
 using BetWin.Game.API.Utils;
 using Newtonsoft.Json;
+using SP.StudioCore.Ioc;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace BetWin.Game.API.Handlers
+namespace BetWin.Game.API.Providers
 {
-    public interface IGameHandler
+    public interface IGameProvider
     {
         public Dictionary<GameLanguage, string> Languages { get; }
 
@@ -72,8 +73,10 @@ namespace BetWin.Game.API.Handlers
         public int CollectDelay { get; }
     }
 
-    public abstract class GameBase : IGameHandler, IGameCollect
+    public abstract class GameBase : IGameProvider, IGameCollect
     {
+        protected IGameAPIHandler? handler => IocCollection.GetService<IGameAPIHandler>();
+
         public GameBase() { }
 
         public GameBase(string jsonString)
@@ -207,10 +210,7 @@ namespace BetWin.Game.API.Handlers
             }
             finally
             {
-                // 写入API请求日志
-                Console.WriteLine($"======== {DateTime.Now:yyyy-MM-dd HH:mm:ss} ========");
-                Console.WriteLine(request.Url);
-                Console.WriteLine(response.ToJson());
+                this.handler?.SaveLog(this.GetType().Name.ToEnum<GameType>(), request, response);
             }
         }
 

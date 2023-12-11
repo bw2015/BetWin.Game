@@ -11,7 +11,7 @@ using System.Data;
 using System.Net.Http;
 using System.Text;
 
-namespace BetWin.Game.API.Handlers
+namespace BetWin.Game.API.Providers
 {
     [Description("开元棋牌")]
     internal class KYChess : GameBase

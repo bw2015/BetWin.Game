@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 using System.Linq;
 using System.Web;
 
-namespace BetWin.Game.API.Handlers
+namespace BetWin.Game.API.Providers
 {
     [Description("雷火电竞")]
     public sealed class TFESport : GameBase
