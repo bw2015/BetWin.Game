@@ -17,7 +17,7 @@ namespace BetWin.Game.API
         /// </summary>
         public static IGameProvider? GetGame(GameType type, string setting)
         {
-            Type handlerType = Assembly.GetAssembly(typeof(GameFactory)).GetType($"{typeof(GameFactory).Namespace}.Handlers.{type}");
+            Type handlerType = Assembly.GetAssembly(typeof(GameFactory)).GetType($"{typeof(IGameProvider).Namespace}.{type}");
             if (handlerType == null) return null;
             return (IGameProvider)Activator.CreateInstance(handlerType, new[] { setting });
         }
@@ -27,7 +27,7 @@ namespace BetWin.Game.API
         /// </summary>
         public static IGameCollect? GetCollect(GameType type)
         {
-            Type handlerType = Assembly.GetAssembly(typeof(GameFactory)).GetType($"{typeof(GameFactory).Namespace}.Handlers.{type}");
+            Type handlerType = Assembly.GetAssembly(typeof(GameFactory)).GetType($"{typeof(IGameCollect).Namespace}.{type}");
             if (handlerType == null) return null;
             return (IGameCollect)Activator.CreateInstance(handlerType, new[] { "{}" });
         }
