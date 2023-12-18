@@ -60,6 +60,12 @@ namespace BetWin.Game.API.Providers
         /// 回调支持
         /// </summary>
         public string Callback(HttpContextModel context);
+
+        /// <summary>
+        /// 扩展查询
+        /// </summary>
+        /// <returns></returns>
+        public string QueryData();
     }
 
     /// <summary>
@@ -183,6 +189,15 @@ namespace BetWin.Game.API.Providers
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// 扩展方法（一般用于初始化查询）
+        /// </summary>
+        /// <returns></returns>
+        public virtual string QueryData()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         /// <summary>
@@ -229,6 +244,11 @@ namespace BetWin.Game.API.Providers
         public virtual int CollectDelay => 60 * 1000;
 
         /// <summary>
+        /// 默认的密码
+        /// </summary>
+        protected virtual string defaultPasssword => this.GetType().Name.ToLower();
+
+        /// <summary>
         /// 创建用户名（转化小写）
         /// </summary>
         /// <param name="prefix"></param>
@@ -250,6 +270,8 @@ namespace BetWin.Game.API.Providers
             if (name.Length > maxLength) name = $"{prefix}{this.UserNameSplit}{Guid.NewGuid().ToString("N")[..(maxLength - prefix.Length - 1)]}";
             return name.ToLower();
         }
+
+
 
     }
 }

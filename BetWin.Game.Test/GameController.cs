@@ -75,7 +75,7 @@ namespace BetWin.Game.Test
         {
             Assembly assembly = typeof(GameFactory).Assembly;
             Type? type = assembly.GetType($"BetWin.Game.API.Requests.{model}");
-            if (type == null) return new NotFoundResult();
+            if (type == null) return new JsonResult(Array.Empty<object>());
             var list = new List<string>();
             foreach (PropertyInfo property in type.GetProperties())
             {
@@ -144,6 +144,20 @@ namespace BetWin.Game.Test
         {
             IGameProvider? handler = this.GetHandler(game, setting);
             var response = handler.GetOrder(model);
+            return new JsonResult(response);
+        }
+
+        /// <summary>
+        /// 扩展查询
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="setting"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public IActionResult QueryData([FromQuery] GameType game, [FromForm] string setting)
+        {
+            IGameProvider? handler = this.GetHandler(game, setting);
+            var response = handler?.QueryData();
             return new JsonResult(response);
         }
     }
