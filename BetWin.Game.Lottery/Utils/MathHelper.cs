@@ -131,23 +131,26 @@ namespace BetWin.Game.Lottery.Utils
         /// <summary>
         /// 概率算法
         /// </summary>
-        /// <param name="numbers">号码，所有概率加起来应等于1</param>
+        /// <param name="numbers">号码的赔率</param>
         /// <returns></returns>
         public static string GetRandom(this Dictionary<string, double> numbers)
         {
-            double sum = numbers.Sum(t => t.Value);
             Random random = new Random();
-            double randomNumber = random.NextDouble() * sum; // 生成0到1之间的随机数
-
-            double probability = 0D;
-            foreach (var item in numbers)
+            while (true)
             {
-                string number = item.Key;
-                double value = item.Value;
+                // 随机排序
+                foreach (KeyValuePair<string, double> item in numbers.OrderBy(t => Guid.NewGuid()))
+                {
+                    // 产生随机数
+                    double rnd = random.NextDouble();
 
-                probability += value;
-                if (randomNumber <= probability) return number;
+                    // 当前号码的概率
+                    double probability = 1D / item.Value;
+
+                    if (rnd < probability) return item.Key;
+                }
             }
+
 
             throw new Exception("没有找到概率数字");
         }

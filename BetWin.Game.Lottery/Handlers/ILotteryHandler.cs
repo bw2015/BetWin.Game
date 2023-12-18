@@ -26,5 +26,15 @@ namespace BetWin.Game.Lottery.Handlers
         /// </summary>
         /// <param name="period">两期之间开奖时间的最低间隔（秒）</param>
         string GetBetIndex(int lotteryCode, long openTime, int period);
+
+        /// <summary>
+        /// 获取已经开奖的号码
+        /// </summary>
+        string GetOpenNumber(int lotteryCode, string index);
+
+        /// <summary>
+        /// 保存已经开奖的号码
+        /// </summary>
+        void SaveOpenNumber(int lotteryCode, string index, string openNumber);
     }
 }

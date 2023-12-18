@@ -339,6 +339,8 @@ namespace BetWin.Game.API.Providers
             return result.Content.ToJson<response<T>>();
         }
 
+        public override int CollectDelay => 10 * 1000;
+
         #region ========  工具方法  ========
 
         private string getSign(out long timestamp)

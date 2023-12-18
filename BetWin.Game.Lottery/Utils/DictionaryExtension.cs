@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 
-namespace BetWin.Game.API.Utils
+namespace BetWin.Game.Lottery.Utils
 {
     internal static class DictionaryExtension
     {
