@@ -136,6 +136,7 @@ namespace BetWin.Game.API.Providers
             return money;
         }
 
+
         protected virtual GameCurrency ConvertCurrency(string currency)
         {
             return this.Currencies?.FirstOrDefault(t => t.Value == currency).Key ?? 0;
@@ -225,7 +226,19 @@ namespace BetWin.Game.API.Providers
             }
             finally
             {
-                this.handler?.SaveLog(this.GetType().Name.ToEnum<GameType>(), request, response);
+                if (this.handler == null)
+                {
+                    // 如果是调试模式
+                    Console.WriteLine($"======== {DateTime.Now:yyyy-MM-dd HH:mm:ss} ========");
+                    Console.WriteLine($"======== Request ========");
+                    Console.WriteLine($"{request.ToJson()}");
+                    Console.WriteLine($"======== Response ========");
+                    Console.WriteLine($"{response.ToJson()}");
+                }
+                else
+                {
+                    this.handler?.SaveLog(this.GetType().Name.ToEnum<GameType>(), request, response);
+                }
             }
         }
 

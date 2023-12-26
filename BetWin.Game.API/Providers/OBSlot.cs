@@ -102,7 +102,13 @@ namespace BetWin.Game.API.Providers
         public override OrderResult GetOrder(QueryOrderModel request)
         {
             // 重复查询1分钟的数据，避免接口延迟导致的掉单
-            DateTime startTime = WebAgent.GetTimestamps(Math.Max(beginTime, request.StartTime)).AddMinutes(-1);
+            DateTime startTime = WebAgent.GetTimestamps(Math.Max(beginTime, request.StartTime));
+
+            if (startTime.TimeOfDay.TotalSeconds > 60)
+            {
+                startTime = startTime.AddMinutes(-1);
+            }
+
             DateTime endTime = startTime.AddMinutes(30);
 
             if (endTime > DateTime.Now) endTime = DateTime.Now;
