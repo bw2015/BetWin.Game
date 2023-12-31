@@ -11,6 +11,13 @@ namespace BetWin.Game.Lottery.Models
     /// </summary>
     public class StepTimeModel
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index">当前的可投注期</param>
+        /// <param name="openTime">当前期的开奖时间</param>
+        /// <param name="startTime">当局的开始时间（可投注时间）</param>
+        /// <param name="endTime">当局的封盘时间</param>
         public StepTimeModel(string index, long openTime, long startTime, long? endTime = null)
         {
             this.index = index;
@@ -20,7 +27,7 @@ namespace BetWin.Game.Lottery.Models
         }
 
         /// <summary>
-        /// 期号
+        /// 当前的可投注期
         /// </summary>
         public string index { get; set; }
 

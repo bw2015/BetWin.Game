@@ -21,5 +21,7 @@ namespace BetWin.Game.API.Enums
         Sport = 6,
         [Description("捕鱼")]
         Fish = 7,
+        [Description("小游戏")]
+        Smart = 8
     }
 }
