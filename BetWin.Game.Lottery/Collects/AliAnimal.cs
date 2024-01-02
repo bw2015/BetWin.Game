@@ -1,5 +1,6 @@
 ﻿using BetWin.Game.Lottery.Collects.Models;
 using BetWin.Game.Lottery.Enums;
+using BetWin.Game.Lottery.Models;
 using BetWin.Game.Lottery.Utils;
 using SP.StudioCore.Net.Http;
 using System;
@@ -35,6 +36,7 @@ namespace BetWin.Game.Lottery.Collects
                     {"Cookie",this.cookie },
                     {"User-Agent","Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1" }
                 });
+                //Console.WriteLine(result.Content);
                 if (!result) return list;
 
                 string? content = this.getContent(result);
@@ -53,13 +55,28 @@ namespace BetWin.Game.Lottery.Collects
                         string.Join(",", record.result.Select(t => this.getNumber(t))),
                         this.getOpenTime(record.issue)));
                 }
+
+                if (list.Any())
+                {
+                    CollectData data = list.FirstOrDefault();
+
+                    DateTime nextTime = WebAgent.GetTimestamps(data.OpenTime + 180 * 1000);
+                    int seconds = (int)nextTime.TimeOfDay.TotalSeconds + 20;
+                    int index = seconds / 180;
+
+                    this.handler?.SaveIndexTime(this.lotteryCode, new StepTimeModel($"{nextTime:yyyyMMdd}{index.ToString().PadLeft(4, '0')}",
+                        data.OpenTime + 180 * 1000,
+                        data.OpenTime,
+                        data.OpenTime + 170 * 1000));
+                }
+
                 return list;
             }
         }
 
         string? getContent(string result)
         {
-            Regex regex = new Regex(@"mtopjsonp16\((?<Content>.+)\)");
+            Regex regex = new Regex(@"mtopjsonp\d+\((?<Content>.+)\)");
             if (!regex.IsMatch(result)) return null;
 
             return regex.Match(result).Groups["Content"].Value;
