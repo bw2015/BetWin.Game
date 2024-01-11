@@ -51,7 +51,7 @@ namespace BetWin.Game.API.Providers
 
         public override BalanceResponse Balance(BalanceModel request)
         {
-            balance balance = this.Post<balance>(APIMethod.Balance, $"/api/v2/balance/?LoginName={request.PlayerName}", null, out GameResultCode code, out string message);
+            balance? balance = this.Post<balance>(APIMethod.Balance, $"/api/v2/balance/?LoginName={request.PlayerName}", null, out GameResultCode code, out string message);
             return new BalanceResponse(code)
             {
                 Balance = balance?.results?.FirstOrDefault()?.balance ?? 0,
@@ -60,7 +60,7 @@ namespace BetWin.Game.API.Providers
 
         public override CheckTransferResponse CheckTransfer(CheckTransferModel request)
         {
-            checkTransfer checkTransfer = this.Post<checkTransfer>(APIMethod.CheckTransfer, $"/api/v2/transfer-status/?reference_no={request.OrderID}", null, out GameResultCode code, out string message);
+            checkTransfer? checkTransfer = this.Post<checkTransfer>(APIMethod.CheckTransfer, $"/api/v2/transfer-status/?reference_no={request.OrderID}", null, out GameResultCode code, out string message);
             checkTransferResult? checkTransferResult = checkTransfer?.results?.FirstOrDefault();
 
             CheckTransferResponse result = new CheckTransferResponse(code)
@@ -102,9 +102,9 @@ namespace BetWin.Game.API.Providers
                 startTime = WebAgent.GetTimestamps(startTime),
                 endTime = WebAgent.GetTimestamps(endTime)
             };
-            order order = this.Post<order>(APIMethod.GetOrder, path, null, out GameResultCode code, out string message);
+            order? order = this.Post<order>(APIMethod.GetOrder, path, null, out GameResultCode code, out string message);
             Dictionary<string, GameCurrency> currency = this.Currencies.ToDictionary(t => t.Value, t => t.Key);
-            foreach (var item in order.results)
+            foreach (var item in order?.results ?? Array.Empty<orderResult>())
             {
                 GameAPIOrderStatus status = GameAPIOrderStatus.Wait;
                 decimal betMoney = item.amount;
@@ -190,7 +190,7 @@ namespace BetWin.Game.API.Providers
             {
                 {"member_code",request.PlayerName }
             };
-            login login = this.Post<login>(APIMethod.Login, "/api/v2/member-login/", data, out GameResultCode code, out string message);
+            login? login = this.Post<login>(APIMethod.Login, "/api/v2/member-login/", data, out GameResultCode code, out string message);
             return new LoginResponse(code)
             {
                 Url = login?.launch_url,
@@ -213,7 +213,7 @@ namespace BetWin.Game.API.Providers
                 {
                     { "member_code",playerName }
                 };
-                register register = this.Post<register>(APIMethod.Register, "/api/v2/members/", data, out GameResultCode code, out string message);
+                register? register = this.Post<register>(APIMethod.Register, "/api/v2/members/", data, out GameResultCode code, out string message);
                 if (code == GameResultCode.DuplicatePlayerName) continue;
                 return new RegisterResponse(code)
                 {
@@ -237,7 +237,7 @@ namespace BetWin.Game.API.Providers
                 {"amount",Math.Abs(request.Money) },
                 {"reference_no",transferId }
             };
-            transfer transfer = this.Post<transfer>(APIMethod.Transfer, $"/api/v2/{action}/", data, out GameResultCode code, out string message);
+            transfer? transfer = this.Post<transfer>(APIMethod.Transfer, $"/api/v2/{action}/", data, out GameResultCode code, out string message);
             return new TransferResponse(code)
             {
                 Money = transfer?.amount ?? 0,
@@ -278,7 +278,7 @@ namespace BetWin.Game.API.Providers
             };
         }
 
-        private T Post<T>(APIMethod method, string url, Dictionary<string, object>? data, out GameResultCode gameCode, out string message)
+        private T? Post<T>(APIMethod method, string url, Dictionary<string, object>? data, out GameResultCode gameCode, out string message) where T : class
         {
             url = url.StartsWith("http") ? url : $"{this.gateway}{url}";
             GameResponse response = this.Request(new GameRequest()
