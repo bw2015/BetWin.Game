@@ -86,7 +86,7 @@ namespace BetWin.Game.Lottery.Collects
                         play = plays[order.Play];
                     }
 
-                    profit += (play.GetReward(order.BetContent, number, this.DefaultOdds) - order.BetMoney);
+                    profit += (play.GetReward(order.BetContent, new OpenNumber(lotteryCode, orderResult.Value.BetIndex, number), this.DefaultOdds) - order.BetMoney);
                 }
 
                 // 试算本号码的整体杀率

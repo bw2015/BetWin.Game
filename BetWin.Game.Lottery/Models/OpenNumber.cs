@@ -11,6 +11,16 @@ namespace BetWin.Game.Lottery.Models
     public struct OpenNumber
     {
         /// <summary>
+        /// 彩种编号
+        /// </summary>
+        public int lotteryId { get; set; }
+
+        /// <summary>
+        /// 开奖期号
+        /// </summary>
+        public string index { get; set; }
+
+        /// <summary>
         /// 开奖号码
         /// </summary>
         private string openNumber;
@@ -20,8 +30,10 @@ namespace BetWin.Game.Lottery.Models
         /// </summary>
         private long openTime;
 
-        public OpenNumber(string openNumber, long openTime = 0)
+        public OpenNumber(int lotteryId, string index, string openNumber, long openTime = 0)
         {
+            this.lotteryId = lotteryId;
+            this.index = index;
             if (openTime == 0) openTime = WebAgent.GetTimestamps();
             this.openNumber = openNumber;
             this.openTime = openTime;
@@ -30,11 +42,6 @@ namespace BetWin.Game.Lottery.Models
         public static implicit operator string(OpenNumber openNumber)
         {
             return openNumber.openNumber;
-        }
-
-        public static implicit operator OpenNumber(string openNumber)
-        {
-            return new OpenNumber(openNumber);
         }
 
         public static implicit operator DateTime(OpenNumber openNumber)

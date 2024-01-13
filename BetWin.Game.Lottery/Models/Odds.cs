@@ -75,6 +75,11 @@ namespace BetWin.Game.Lottery.Models
             return sb.ToString();
         }
 
+        internal bool Contains(string content)
+        {
+            return this._data.ContainsKey(content);
+        }
+
         public static Odds operator +(Odds odds1, Odds odds2)
         {
             foreach (string key in odds2._data.Keys)

@@ -1,4 +1,6 @@
-﻿using BetWin.Game.Lottery.Models;
+﻿using BetWin.Game.Lottery.Handlers;
+using BetWin.Game.Lottery.Models;
+using SP.StudioCore.Ioc;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -51,6 +53,8 @@ namespace BetWin.Game.Lottery.Base
         /// </summary>
         /// <returns></returns>
         protected abstract Odds DefaultOdds { get; }
+
+        protected ILotteryHandler? handler => IocCollection.GetService<ILotteryHandler>();
 
         public Odds GetDefaultOdds() => this.DefaultOdds;
 

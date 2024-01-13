@@ -18,6 +18,11 @@ namespace BetWin.Game.Lottery.Models
         /// </summary>
         public decimal Money { get; set; }
 
+        /// <summary>
+        /// 投注的期号
+        /// </summary>
+        public string BetIndex { get; set; }
+
         public List<BetOrder> Orders { get; set; }
 
         public static implicit operator bool(BetOrderResult betOrderResult)

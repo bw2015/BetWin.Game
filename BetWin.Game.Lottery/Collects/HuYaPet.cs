@@ -5,6 +5,7 @@ using BetWin.Game.Lottery.Utils;
 using Newtonsoft.Json;
 using SP.StudioCore.Net.Http;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -46,52 +47,90 @@ namespace BetWin.Game.Lottery.Collects
             if (string.IsNullOrEmpty(result)) yield break;
 
             pet[]? pets = JsonConvert.DeserializeObject<pet[]>(result);
-            if (pets == null) yield break;
+            if (pets == null || !pets.Any()) yield break;
 
-          
-            foreach (var pet in pets)
+
+            foreach (pet pet in pets)
             {
                 if (pet.date == null || pet.date.Length != 2) continue;
-                DateTime openTime = DateTime.Parse($"{DateTime.Now.Year}-{pet.date[0]} {pet.date[1]}");
-                string index = openTime.ToString("yyyyMMddHHmm");
 
-                if (pet.date?.Length == 2 && pet.locList?.Length == 0 && pet.odds?.Length == 7)
+                DateTime? openTime = pet.getOpenTime();
+                string? index = pet.getIndex();
+
+                if (openTime == null || index == null) continue;
+
+                // 如果是赔率推送
+                if (pet.date?.Length == 2 && pet.locList?.Length == 0 && pet.odds?.Length == 7 && pet.openTime != null)
                 {
                     if (pet.Odds != null)
                     {
+                        // 保存自定义的赔率内容
                         this.handler?.SaveIndexData(this.lotteryCode, index, pet.Odds.ToDictionary(t => this.getNumber(t.Key), t => t.Value));
+
+                        // 如果是开奖期
+                        this.handler?.SaveIndexTime(this.lotteryCode,
+                            new StepTimeModel(index,
+                            pet.openTime.Value,
+                            pet.openTime.Value - 120 * 1000));
+
+                        // 保存开奖时间到本地缓存
+                        saveOpenTime(index, pet.openTime.Value);
                     }
                 }
+
+                // 如果开奖动物没有数据
                 if (pet.locList == null) continue;
 
-                // 当前的开奖期
-                if(pet.locList.Length == 0)
-                {
-                    // 虎牙需要额外传递真实的开奖时间
-                    //this.handler?.SaveStepTime(this.lotteryCode, new StepTimeModel());
-                }
+                string? openNumber = pet.getNumber();
 
-                if (pet.locList.Length != 1) continue;
-                if (openTime > DateTime.Now) openTime = openTime.AddYears(-1);
-                string number = this.getNumber(pet.locList[0]);
+                if (string.IsNullOrEmpty(openNumber)) continue;
+                if (openTime > DateTime.Now) openTime = openTime.Value.AddYears(-1);
+                string number = this.getNumber(openNumber);
 
-                yield return new CollectData(index, number, WebAgent.GetTimestamps(getOpenTime(openTime)));
+                yield return new CollectData(index, number, getOpenTime(index, openTime.Value));
             }
         }
 
+        #region ========  开奖时间静态缓存  ========
+
+
+        private static ConcurrentDictionary<string, long> openTimeCache = new ConcurrentDictionary<string, long>();
+
         /// <summary>
-        /// 根据当前时间生成开奖时间
+        /// 写入开奖时间
         /// </summary>
-        /// <param name="openTime"></param>
-        /// <returns></returns>
-        private DateTime getOpenTime(DateTime openTime)
+        private static void saveOpenTime(string index, long openTime)
         {
-            DateTime now = DateTime.Now;
-            openTime = openTime.AddMinutes(2);
-            if (now - openTime < TimeSpan.FromMinutes(1)) return openTime.AddSeconds(now.Second);
-            if (now - openTime < TimeSpan.FromMinutes(1.5)) return now.AddSeconds(-3);
-            return openTime;
+            if (openTimeCache.ContainsKey(index)) return;
+
+            long now = WebAgent.GetTimestamps();
+
+            // 超过30分钟的删除
+            foreach (string timeIndex in openTimeCache.Keys.ToArray())
+            {
+                long time = openTimeCache[timeIndex];
+                if (now - time > 30 * 60 * 1000)
+                {
+                    openTimeCache.TryRemove(timeIndex, out time);
+                }
+            }
+
+            if (!openTimeCache.ContainsKey(index)) openTimeCache.TryAdd(index, openTime);
         }
+
+        /// <summary>
+        /// 从缓存中获取开奖时间
+        /// </summary>
+        private static long getOpenTime(string index, DateTime openTime)
+        {
+            if (openTimeCache.TryGetValue(index, out long time))
+            {
+                return time;
+            }
+            return WebAgent.GetTimestamps(openTime);
+        }
+
+        #endregion
 
         string getNumber(string petName)
         {
@@ -111,7 +150,7 @@ namespace BetWin.Game.Lottery.Collects
         class pet
         {
             /// <summary>
-            /// 开奖时间（到分钟）
+            /// 开始时间
             /// </summary>
             public string[]? date { get; set; }
 
@@ -124,6 +163,38 @@ namespace BetWin.Game.Lottery.Collects
             /// 正在开奖期的赔率
             /// </summary>
             public string[]? odds { get; set; }
+
+            /// <summary>
+            /// 开奖时间
+            /// </summary>
+            public long? openTime { get; set; }
+
+            /// <summary>
+            /// 获取当前期
+            /// </summary>
+            /// <returns></returns>
+            public string? getIndex()
+            {
+                DateTime? openTime = this.getOpenTime();
+                if (openTime == null) return null;
+                return openTime.Value.ToString("yyyyMMddHHmm");
+            }
+
+            public DateTime? getOpenTime()
+            {
+                if (this.date == null || this.date.Length != 2) return null;
+                DateTime openTime = DateTime.Parse($"{DateTime.Now.Year}-{this.date[0]} {this.date[1]}");
+                return openTime;
+            }
+
+            /// <summary>
+            /// 获取开奖号码
+            /// </summary>
+            public string? getNumber()
+            {
+                if (this.locList == null || this.locList.Length != 1) return null;
+                return this.locList[0];
+            }
 
             [JsonIgnore]
             public Dictionary<string, int>? Odds
