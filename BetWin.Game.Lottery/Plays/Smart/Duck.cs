@@ -11,14 +11,14 @@ namespace BetWin.Game.Lottery.Plays.Smart
     {
         protected override Odds DefaultOdds => new Dictionary<string, decimal>()
         {
-            {"1",52 },
-            {"2",32 },
-            {"3",15M },
-            {"4",8 },
-            {"5",5 },
-            {"6",6 },
-            {"7",10 },
-            {"8",3.2M }
+            {"1",4 },
+            {"2",5 },
+            {"3",40 },
+            {"4",30 },
+            {"5",12 },
+            {"6",11 },
+            {"7",9 },
+            {"8",2.5M }
         };
 
        

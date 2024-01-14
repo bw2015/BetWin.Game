@@ -46,6 +46,8 @@ namespace BetWin.Game.Lottery.Collects
             string result = Client.Get(url, new Dictionary<string, string>());
             if (string.IsNullOrEmpty(result)) yield break;
 
+            Console.WriteLine(result);
+
             pet[]? pets = JsonConvert.DeserializeObject<pet[]>(result);
             if (pets == null || !pets.Any()) yield break;
 
