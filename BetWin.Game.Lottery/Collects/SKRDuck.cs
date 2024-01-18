@@ -12,15 +12,18 @@ using System.Text;
 
 namespace BetWin.Game.Lottery.Collects
 {
+    /// <summary>
+    /// 脚本中转采集
+    /// </summary>
     [Description("抓鸭子")]
     public class SKRDuck : CollectProviderBase
     {
         /// <summary>
         /// 
         /// </summary>
-        public string gateway { get; set; } = "https://act.inframe.mobi/v1/mstask/catch-duck/lottery-record?offset=0&cnt=20&limit=20";
+        public string gateway { get; set; } = "http://api.a8.to/Common/API_GetData";
 
-        public string cookie { get; set; } = "S=lt%3D1704778651269260703%26ut%3D1704778651269260703%26s%3D11928da99c5c392d74b08477d147bc15;T=i%3D15594366%26u%3D%26n%3DU2tyMTU1OTQ%3D%26e%3D%26p%3DMTg2ODg4NTg1Nzg%3D%26a%3DaHR0cDovL3Jlcy1zdGF0aWMuaW5mcmFtZS5tb2JpL3VpLzE2NzI4MTIyNDM5NTQzNy5wbmc%3D%26ct%3D1704778651";
+        public string key { get; set; } = "SKR.duck";
 
         public SKRDuck(string setting) : base(setting)
         {
@@ -32,13 +35,14 @@ namespace BetWin.Game.Lottery.Collects
 
         public override IEnumerable<CollectData> Execute()
         {
+            string url = $"{this.gateway}?key={this.key}";
             List<CollectData> list = new List<CollectData>();
             long now = WebAgent.GetTimestamps() / 1000L;
             if (now - lastTime < 30) return list;
 
             using (HttpClient client = new HttpClient())
             {
-                HttpClientResponse result = client.Get(this.gateway, new Dictionary<string, string>()
+                HttpClientResponse result = client.Get(url, new Dictionary<string, string>()
                 {
                     {"accept","application/json, text/plain, */*" },
                     {"sec-fetch-site","same-origin" },
@@ -46,24 +50,22 @@ namespace BetWin.Game.Lottery.Collects
                     {"accept-encoding","gzip, deflate, br" },
                     {"sec-fetch-mode","cors" },
                     {"user-agent","Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 pid/39E53030-2721-4381-B06B-2F420EBED052 NetType/WiFi Pixel/1242 appVersion/5008003 DeviceName/iPhone XS Max CN" },
-                    {"referer","https://act.inframe.mobi/ducks/?roomID=2501056&title=1&userID=15594366&cache=1" },
-                    {"sec-fetch-dest","empty" },
-                    {"cookie",this.cookie }
+                    {"sec-fetch-dest","empty" }
                 });
 
                 if (!result) return list;
 
                 response? response = result.Content.ToJson<response>();
 
-                if (response?.data?.items == null) return list;
+                if (response?.items == null) return list;
 
-                foreach (var item in response.data.items)
+                foreach (var item in response.items)
                 {
                     list.Add(new CollectData(item.gameID.ToString(), this.getNumber(item.duckName), item.createdTime * 1000L));
                 }
 
-                lastTime = response.data.items.Max(t => t.createdTime);
-                int gameId = response.data.items.Max(t => t.gameID);
+                lastTime = response.items.Max(t => t.createdTime);
+                int gameId = response.items.Max(t => t.gameID);
 
                 this.handler?.SaveIndexTime(this.lotteryCode, new StepTimeModel((gameId + 1).ToString(), (lastTime + 30) * 1000L, lastTime * 1000L));
 
@@ -87,16 +89,8 @@ namespace BetWin.Game.Lottery.Collects
             };
         }
 
+
         class response
-        {
-            public int errno { get; set; }
-
-            public string? errmsg { get; set; }
-
-            public responseData? data { get; set; }
-        }
-
-        class responseData
         {
             public bool hasMore { get; set; }
 
