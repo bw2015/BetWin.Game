@@ -1,5 +1,6 @@
 ﻿using BetWin.Game.Lottery.Collects.Models;
 using BetWin.Game.Lottery.Enums;
+using BetWin.Game.Lottery.Models;
 using BetWin.Game.Lottery.Utils;
 using Newtonsoft.Json;
 using SP.StudioCore.Net.Http;
@@ -49,7 +50,12 @@ namespace BetWin.Game.Lottery.Collects
                 if (item.date == null || item.date.Length != 2) continue;
                 DateTime openTime = DateTime.Parse($"{DateTime.Now.Year}-{item.date[0]} {item.date[1]}");
                 string index = openTime.ToString("yyyyMMddHHmm");
-                if (item.locList == null || !item.locList.Any()) continue;
+                if (item.locList == null || !item.locList.Any())
+                {
+                    this.handler?.SaveIndexTime(this.lotteryCode, new StepTimeModel(index, WebAgent.GetTimestamps(this.getOpenTime(openTime)),
+                        WebAgent.GetTimestamps(openTime)));
+                    continue;
+                }
 
                 if (openTime > DateTime.Now) openTime = openTime.AddYears(-1);
                 string number = this.getNumber(item.locList);
