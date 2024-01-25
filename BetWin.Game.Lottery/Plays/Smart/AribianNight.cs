@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 
 namespace BetWin.Game.Lottery.Plays.Smart
@@ -46,7 +47,8 @@ namespace BetWin.Game.Lottery.Plays.Smart
 
         protected override RewardOdds CheckReward(string input, OpenNumber openNumber, Odds odds)
         {
-            if (input != openNumber) return decimal.Zero;
+            string[] numbers = ((string)openNumber).Split(',');
+            if (!numbers.Contains(input)) return decimal.Zero;
             return odds.GetOdds(input);
         }
 
