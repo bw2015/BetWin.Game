@@ -11,6 +11,10 @@ namespace BetWin.Game.API
     /// </summary>
     public interface IGameAPIHandler
     {
+        string GetData(string key);
+
+        void SaveData(string key, string value, TimeSpan timeSpan);
+
         /// <summary>
         /// 保存游戏请求内容
         /// </summary>
