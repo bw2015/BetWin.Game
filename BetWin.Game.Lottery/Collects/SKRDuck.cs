@@ -54,8 +54,13 @@ namespace BetWin.Game.Lottery.Collects
                 });
 
                 if (!result) return list;
+                string content = result.Content;
+                if (content.StartsWith("["))
+                {
+                    content = string.Concat("{\"hasMore\":true,\"offset\":0,\"items\":", content, "}");
+                }
 
-                response? response = result.Content.ToJson<response>();
+                response? response = content.ToJson<response>();
 
                 if (response?.items == null) return list;
 
