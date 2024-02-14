@@ -67,7 +67,7 @@ namespace BetWin.Game.Lottery.Collects
                     if (pet.Odds != null)
                     {
                         // 保存自定义的赔率内容
-                        this.handler?.SaveIndexData(this.lotteryCode, index, pet.Odds.ToDictionary(t => this.getNumber(t.Key), t => t.Value));
+                        this.handler?.SaveIndexData(this.lotteryCode, index, pet.Odds.ToDictionary(t => this.getNumber(t.Key), t => this.getOdds(t.Value)));
 
                         // 如果是开奖期
                         this.handler?.SaveIndexTime(this.lotteryCode,
@@ -91,6 +91,20 @@ namespace BetWin.Game.Lottery.Collects
 
                 yield return new CollectData(index, number, getOpenTime(index, openTime.Value));
             }
+        }
+
+        /// <summary>
+        /// 赔率转换
+        /// </summary>
+        /// <param name="odds"></param>
+        /// <returns></returns>
+        private int getOdds(int odds)
+        {
+            return odds switch
+            {
+                3 => 2,
+                _ => odds
+            };
         }
 
         #region ========  开奖时间静态缓存  ========
