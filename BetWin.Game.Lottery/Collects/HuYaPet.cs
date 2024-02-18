@@ -102,7 +102,7 @@ namespace BetWin.Game.Lottery.Collects
         {
             return odds switch
             {
-                3 => 2,
+                //3 => 2,
                 _ => odds
             };
         }

@@ -28,5 +28,7 @@ namespace BetWin.Game.Lottery.Utils
         {
             return string.Join("&", dictionary.Select(t => $"{t.Key}={(urlEncode ? HttpUtility.UrlEncode(t.Value == null ? string.Empty : t.Value.ToString()) : t.Value?.ToString())}"));
         }
+
+
     }
 }

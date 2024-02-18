@@ -43,7 +43,9 @@ namespace BetWin.Game.Lottery.Plays.Smart
             if (petOdds == null) return decimal.Zero;
             if (input != openNumber) return decimal.Zero;
 
-            return petOdds.Get(openNumber);
+            odds.UpdateByIndex(petOdds);
+
+            return odds.GetOdds(openNumber);
         }
 
         protected override int GetBetCountNumber(string input)

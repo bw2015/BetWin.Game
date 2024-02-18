@@ -88,5 +88,22 @@ namespace BetWin.Game.Lottery.Models
             }
             return odds1;
         }
+
+        /// <summary>
+        /// 按照赔率的大小进行新赔率匹配（适用于非固定赔率的场景）
+        /// </summary>
+        /// <param name="indexOdds"></param>
+        public void UpdateByIndex(Dictionary<string, decimal> indexOdds)
+        {
+            decimal[] oddsValues = this._data.Values.OrderBy(t => t).ToArray();
+            decimal[] indexOddsValues = indexOdds.Values.OrderBy(t => t).ToArray();
+
+            foreach (string number in indexOdds.Keys.ToArray())
+            {
+                int indexValue = Array.IndexOf(indexOddsValues, indexOdds[number]);
+                if (indexValue == -1) continue;
+                this._data[number] = oddsValues[indexValue];
+            }
+        }
     }
 }
