@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\SP.Studio\SP.StudioCore.API.Baidu\SP.StudioCore.API.Baidu.csproj" />
     <ProjectReference Include="..\..\SP.Studio\SP.StudioCore.Ioc\SP.StudioCore.Ioc.csproj" />
     <ProjectReference Include="..\..\SP.Studio\SP.StudioCore.Net.Http\SP.StudioCore.Net.Http.csproj" />
   </ItemGroup>

@@ -31,6 +31,11 @@ namespace BetWin.Game.Lottery.Base
         /// </summary>
         /// <returns></returns>
         public Odds GetDefaultOdds();
+
+        /// <summary>
+        /// 可投注的号码
+        /// </summary>
+        public string[] GetBetNumbers();
     }
 
     /// <summary>
@@ -38,6 +43,8 @@ namespace BetWin.Game.Lottery.Base
     /// </summary>
     public abstract class LotteryBase : ILotteryPlay
     {
+        protected virtual ILotteryHandler? handler => IocCollection.GetService<ILotteryHandler>();
+
         /// <summary>
         /// 检查开奖号码是否符合规范
         /// </summary>
@@ -54,9 +61,13 @@ namespace BetWin.Game.Lottery.Base
         /// <returns></returns>
         protected abstract Odds DefaultOdds { get; }
 
-        protected ILotteryHandler? handler => IocCollection.GetService<ILotteryHandler>();
+        protected virtual string[] BetNumbers => throw new NotImplementedException();
+
+
 
         public Odds GetDefaultOdds() => this.DefaultOdds;
+
+        public virtual string[] GetBetNumbers() => this.GetDefaultOdds();
 
         /// <summary>
         /// 判断是否中奖

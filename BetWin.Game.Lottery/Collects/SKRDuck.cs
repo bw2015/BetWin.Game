@@ -2,6 +2,7 @@
 using BetWin.Game.Lottery.Enums;
 using BetWin.Game.Lottery.Models;
 using BetWin.Game.Lottery.Utils;
+using SP.StudioCore.API.Baidu;
 using SP.StudioCore.Net.Http;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,10 @@ namespace BetWin.Game.Lottery.Collects
         public string gateway { get; set; } = "http://api.a8.to/Common/API_GetData";
 
         public string key { get; set; } = "SKR.duck";
+
+        public string app_key { get; set; } = "ajWI3G06OsttwChmBwhQ6Rob";
+
+        public string app_secret { get; set; } = "wiQ1HOqOxA3nfbpdv6GgQuFXTATIX2x2";
 
         public SKRDuck(string setting) : base(setting)
         {
@@ -66,6 +71,8 @@ namespace BetWin.Game.Lottery.Collects
 
                 foreach (var item in response.items)
                 {
+                    string duckName = this.getNumber(item.duckName);
+                    if (duckName == "0") continue;
                     list.Add(new CollectData(item.gameID.ToString(), this.getNumber(item.duckName), item.createdTime * 1000L));
                 }
 
@@ -80,6 +87,7 @@ namespace BetWin.Game.Lottery.Collects
 
         private string getNumber(string? name)
         {
+            name = this.getDuckName(name);
             return name switch
             {
                 "划水鸭" => "1",   // 1.6%
@@ -92,6 +100,27 @@ namespace BetWin.Game.Lottery.Collects
                 "吃瓜鸭" => "8",   // 31.3%
                 _ => "0"
             };
+        }
+
+        static Dictionary<string, string> cache = new Dictionary<string, string>();
+
+        /// <summary>
+        /// 使用OCR进行识别
+        /// </summary>
+        private string? getDuckName(string? file)
+        {
+            if (file == null || !file.EndsWith(".png")) return file;
+            file = $"https://res-static.inframe.mobi/ui/{file}";
+            if (cache.ContainsKey(file)) return cache[file];
+
+            IEnumerable<string> words = new BaiduClient(this.app_key, this.app_secret).getContent(file);
+            string content = string.Join(string.Empty, words);
+            if (words.Any() || !string.IsNullOrEmpty(content))
+            {
+                cache.Add(file, content);
+            }
+            Console.WriteLine($"{file},{content}");
+            return content;
         }
 
 

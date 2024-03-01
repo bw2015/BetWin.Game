@@ -27,6 +27,11 @@ namespace BetWin.Game.Lottery.Models
             return odds._data;
         }
 
+        public static implicit operator string[](Odds odds)
+        {
+            return odds._data.Keys.ToArray();
+        }
+
         /// <summary>
         /// 设定赔率
         /// </summary>
@@ -65,13 +70,29 @@ namespace BetWin.Game.Lottery.Models
         /// 根据用户的发点返回玩法赔率
         /// </summary>
         /// <param name="rebate">最大值2000</param>
+        /// <param name="numbers">自定义的号码</param>
         /// <returns></returns>
-        public string ToString(int rebate)
+        public string ToString(int rebate, string[]? numbers = null)
         {
             rebate = Math.Min(2000, rebate);
-            StringBuilder sb = new StringBuilder("{")
-               .Append(string.Join(",", this._data.Select(t => $"\"{t.Key}\":{Math.Floor(t.Value * (decimal)rebate / 2000M * 100M) / 100M}")))
-               .Append("}");
+
+
+
+            StringBuilder sb = new StringBuilder("{");
+            if (numbers == null)
+            {
+                sb.Append(string.Join(",", this._data.Select(t => $"\"{t.Key}\":{Math.Floor(t.Value * (decimal)rebate / 2000M * 100M) / 100M}")));
+            }
+            else
+            {
+                var data = this._data;
+                sb.Append(string.Join(",", numbers.Select(t =>
+                {
+                    return string.Concat($"\"{t}\":",
+                        (data.ContainsKey(t) ? Math.Floor(data[t] * (decimal)rebate / 2000M * 100M) / 100M : 0M));
+                })));
+            }
+            sb.Append("}");
             return sb.ToString();
         }
 
