@@ -17,7 +17,7 @@ namespace BetWin.Game.Lottery.Plays.Smart
 
         public override string[] GetBetNumbers()
         {
-            return new[] { "1", "2", "3", "4", "5", "6", "7", "8" };
+            return new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
         }
 
         protected override bool CheckBetContent(string content)
