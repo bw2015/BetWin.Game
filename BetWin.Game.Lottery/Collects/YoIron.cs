@@ -41,20 +41,20 @@ namespace BetWin.Game.Lottery.Collects
                 }
             }
 
+
+
             DateTime now = DateTime.Now;
             int minute = (int)now.TimeOfDay.TotalMinutes;
-            if (minute % 3 != 0)
-            {
-                minute += (minute % 3);
-            }
-            else
-            {
-                minute += 3;
-            }
-            DateTime openTime = now.Date.AddMinutes(minute);
+            minute -= (minute % 3);
+            DateTime betTime = now.Date.AddMinutes(minute);
 
-            string index = string.Concat(openTime.ToString("yyyyMMdd"), (minute / 3 + 1).ToString().PadLeft(3, '0'));
-            this.handler?.SaveIndexTime(this.lotteryCode, new StepTimeModel(index, WebAgent.GetTimestamps(openTime), WebAgent.GetTimestamps(openTime.AddMinutes(-3))));
+            item betItem = new item()
+            {
+                openTime = betTime
+            };
+
+            this.handler?.SaveIndexTime(this.lotteryCode, new StepTimeModel(betItem.index,
+                WebAgent.GetTimestamps(betItem.openTime.AddMinutes(3)), WebAgent.GetTimestamps(betTime)));
 
             return list;
         }
