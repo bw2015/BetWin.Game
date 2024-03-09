@@ -32,11 +32,12 @@ namespace BetWin.Game.Lottery.Collects
             {
                 string content = client.Get(url, new Dictionary<string, string>());
                 item[]? items = content.ToJson<item[]>();
-                if (items == null) return list;
-
-                foreach (item item in items)
+                if (items != null)
                 {
-                    list.Add(new CollectData(item.index, this.getNumber(item.name), WebAgent.GetTimestamps(item.openTime)));
+                    foreach (item item in items)
+                    {
+                        list.Add(new CollectData(item.index, this.getNumber(item.name), WebAgent.GetTimestamps(item.openTime)));
+                    }
                 }
             }
 
@@ -100,6 +101,9 @@ namespace BetWin.Game.Lottery.Collects
             {
                 get
                 {
+                    // 游戏只在下午6点到凌晨2点之间开放
+                    if (this.openTime.Hour >= 2 && this.openTime.Hour < 18) return string.Empty;
+
                     string date = this.openTime.ToString("yyyyMMdd");
                     int minute = (int)this.openTime.TimeOfDay.TotalMinutes;
                     return string.Concat(date, minute.ToString().PadLeft(4, '0'));
