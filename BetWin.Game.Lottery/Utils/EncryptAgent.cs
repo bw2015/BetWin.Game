@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -25,6 +26,31 @@ namespace BetWin.Game.Lottery.Utils
                     sb.Append(hashBytes[i].ToString("X2"));
                 }
                 return sb.ToString();
+            }
+        }
+
+        /// <summary>
+        /// AES解密
+        /// </summary>
+        /// <param name="base64String"></param>
+        /// <returns></returns>
+        public static string AESDecrypt(this string base64String, string keyString, string ivString, CipherMode mode = CipherMode.CBC, PaddingMode padding = PaddingMode.PKCS7)
+        {
+            byte[] cipherText = Convert.FromBase64String(base64String);
+            byte[] key = Encoding.UTF8.GetBytes(keyString);
+            byte[] iv = Encoding.UTF8.GetBytes(ivString);
+            using (Aes aesAlg = Aes.Create())
+            {
+                aesAlg.Key = key;
+                aesAlg.IV = iv;
+                aesAlg.Mode = mode;
+                aesAlg.Padding = padding;
+
+                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+                using MemoryStream msDecrypt = new MemoryStream(cipherText);
+                using CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+                using StreamReader srDecrypt = new StreamReader(csDecrypt);
+                return srDecrypt.ReadToEnd();
             }
         }
     }
