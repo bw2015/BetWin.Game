@@ -11,5 +11,19 @@ namespace BetWin.Game.Payment.Utils
         {
             return JsonConvert.SerializeObject(info, Formatting.Indented);
         }
+
+        public static T? ToJson<T>(this string jsonString) where T : class 
+        {
+            if (string.IsNullOrEmpty(jsonString)) return default;
+
+            try
+            {
+                return JsonConvert.DeserializeObject<T>(jsonString);
+            }
+            catch
+            {
+                return default;
+            }
+        }
     }
 }

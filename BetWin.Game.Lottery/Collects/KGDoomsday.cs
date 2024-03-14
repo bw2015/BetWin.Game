@@ -67,7 +67,7 @@ namespace BetWin.Game.Lottery.Collects
             string betIndex = WebAgent.GetTimestamps(betTime).ToString("yyyyMMddHHmmss");
             this.handler?.SaveIndexTime(this.lotteryCode, new StepTimeModel(betIndex, this.getOpenTime(betIndex), betTime));
 
-            return list;
+            return list.Where(t => t.Number != "0");
         }
 
         /// <summary>
