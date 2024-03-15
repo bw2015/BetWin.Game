@@ -15,9 +15,7 @@ namespace BetWin.Game.Lottery.Collects
     [Description("超能运动会")]
     internal class YoSuperSport : CollectProviderBase
     {
-        public string gateway { get; set; } = "http://api.a8.to/Common/API_GetData";
-
-        public string key { get; set; } = "YY.SuperSport";
+        public string url { get; set; } = "http://api.a8.to/Common/API_GetData?key=Yo.Super";
 
         public YoSuperSport(string setting) : base(setting)
         {
@@ -37,8 +35,7 @@ namespace BetWin.Game.Lottery.Collects
 
         public override IEnumerable<CollectData> Execute()
         {
-            string url = $"{this.gateway}?key={this.key}";
-            string result = Client.Get(url, new Dictionary<string, string>());
+            string result = Client.Get(this.url, new Dictionary<string, string>());
             if (string.IsNullOrEmpty(result)) yield break;
 
             response[]? list = result.ToJson<response[]>();
@@ -46,7 +43,7 @@ namespace BetWin.Game.Lottery.Collects
             foreach (response res in list)
             {
                 if (res.OpenTime == 0) yield break;
-                yield return new CollectData(res.Index, res.openNumber.ToString(), res.OpenTime);
+                yield return new CollectData(res.Index, this.getNumber(res.animal_id), res.OpenTime);
             }
 
             response newResult = list.FirstOrDefault();
@@ -54,8 +51,36 @@ namespace BetWin.Game.Lottery.Collects
                  WebAgent.GetTimestamps(newResult.OpenTime + 40 * 1000).ToString("yyyyMMddHHmmss"),
                  newResult.OpenTime + 40 * 1000,
                  newResult.OpenTime,
-                 newResult.OpenTime + 30 * 1000
+                 newResult.OpenTime + 35 * 1000
                 ));
+        }
+
+        private string getNumber(int animal_id)
+        {
+
+            //{id:1,name:"迅影猴",
+            //id:5,name:"闪电鼠",
+            //id:2,name:"滚石猫"
+            //id:4,name:"奔雷虎"
+            //id:6,name:"火箭龟"
+            //id:3,name:"流星兔"
+            return animal_id switch
+            {
+                // 迅影猴
+                1 => "1",
+                // 滚石猫
+                2 => "2",
+                // 流星兔
+                3 => "3",
+                // 奔雷虎
+                4 => "4",
+                // 闪电鼠
+                5 => "5",
+                // 火箭龟
+                6 => "6",
+
+                _ => "0"
+            };
         }
 
 
@@ -64,26 +89,17 @@ namespace BetWin.Game.Lottery.Collects
             /// <summary>
             /// 开奖号码
             /// </summary>
-            public int openNumber { get; set; }
+            public int animal_id { get; set; }
 
             /// <summary>
-            /// 开奖时间
+            /// 开奖时间（秒）
             /// </summary>
-            public long openTime { get; set; }
+            public long timestamp { get; set; }
 
             /// <summary>
             /// 10秒取整之后的开奖时间
             /// </summary>
-            public long OpenTime
-            {
-                get
-                {
-                    long time = this.openTime / 1000L;
-                    time -= time % 10;
-                    if (time % 40 != 0) return 0;
-                    return time * 1000;
-                }
-            }
+            public long OpenTime => this.timestamp * 1000L + 40 * 1000L;
 
             /// <summary>
             /// 开奖期号

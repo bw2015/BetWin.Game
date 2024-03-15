@@ -60,14 +60,32 @@ namespace BetWin.Game.Lottery.Collects
             var logs = this.getLogs().Where(t => t.Index != current?.Index);
             list.AddRange(logs);
 
-            // 根据当前时间得到当前的可投注期
-            long now = WebAgent.GetTimestamps();
-            long betTime = (now / 50000) * 50000 - 20000;
-            if (betTime < WebAgent.GetTimestamps()) betTime += 50000;
-            string betIndex = WebAgent.GetTimestamps(betTime).ToString("yyyyMMddHHmmss");
-            this.handler?.SaveIndexTime(this.lotteryCode, new StepTimeModel(betIndex, this.getOpenTime(betIndex), betTime));
+            // 根据当前期得到下一期的数据
+            CollectData? bet = list.FirstOrDefault();
+            if (bet != null)
+            {
+                string? nextIndex = this.getNextIndex(bet.Value.Index);
+                if (nextIndex != null)
+                {
+
+                    this.handler?.SaveIndexTime(this.lotteryCode, new StepTimeModel(nextIndex, bet.Value.OpenTime + 50 * 1000, bet.Value.OpenTime + 15 * 1000));
+
+                }
+            }
 
             return list.Where(t => t.Number != "0");
+        }
+
+        private string? getNextIndex(string roundId)
+        {
+            Regex regex = new Regex(@"^(?<Year>\d{4})(?<Month>\d{2})(?<Day>\d{2})(?<Hour>\d{2})(?<Minute>\d{2})(?<Second>\d{2})$");
+            if (!regex.IsMatch(roundId)) return null;
+
+            var group = regex.Match(roundId).Groups;
+            DateTime openTime = DateTime.Parse($"{group["Year"].Value}-{group["Month"].Value}-{group["Day"].Value} {group["Hour"].Value}:{group["Minute"].Value}:{group["Second"].Value}");
+
+            DateTime nextTime = openTime.AddSeconds(50);
+            return nextTime.ToString("yyyyMMddHHmmss");
         }
 
         /// <summary>

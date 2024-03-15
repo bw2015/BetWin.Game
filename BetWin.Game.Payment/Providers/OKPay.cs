@@ -30,6 +30,14 @@ namespace BetWin.Game.Payment.Providers
 
         protected override CallbackResponse callback(HttpContext context)
         {
+            if (context.Request.Method == "GET")
+            {
+                return new CallbackResponse(HttpStatusCode.OK, "充值成功")
+                {
+                    success = false
+                };
+            }
+
             string content = context.GetString();
             JObject info = JObject.Parse(content);
 
