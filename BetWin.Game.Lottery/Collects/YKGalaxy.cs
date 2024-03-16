@@ -6,17 +6,17 @@ using SP.StudioCore.Net.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace BetWin.Game.Lottery.Collects
 {
     [Description("映客-银河探险")]
     public class YKGalaxy : CollectProviderBase
     {
-        public string gateway { get; set; } = "http://api.a8.to/Common/API_GetData";
-
-        public string key { get; set; } = "YK.Galaxy";
+        public string url { get; set; } = "http://api.a8.to/Common/API_GetData?key=YK.Galaxy";
 
         public YKGalaxy(string setting) : base(setting)
         {
@@ -26,34 +26,28 @@ namespace BetWin.Game.Lottery.Collects
 
         public override IEnumerable<CollectData> Execute()
         {
-            string url = $"{this.gateway}?key={this.key}";
             List<CollectData> list = new List<CollectData>();
             using (HttpClient client = new HttpClient())
             {
                 string content = client.Get(url, new Dictionary<string, string>());
-                item[]? items = content.ToJson<item[]>();
-                if (items != null)
+                response? res = content.ToJson<response>();
+                if (res != null)
                 {
-                    foreach (item item in items)
-                    {
-                        list.Add(new CollectData(item.index, this.getNumber(item.name), WebAgent.GetTimestamps(item.openTime)));
-                    }
+                    list.Add(new CollectData(res.index, this.getNumber(res.name), WebAgent.GetTimestamps(res.openTime)));
                 }
             }
 
-            // 得到当前时间的可投注期
-            DateTime now = DateTime.Now.Date.AddMinutes((int)DateTime.Now.TimeOfDay.TotalMinutes);
-            if(now.Second > 50)
+            // 根据当前期计算出可投注的数据
+            CollectData? data = list.FirstOrDefault();
+            if (data != null)
             {
-                now = now.AddMinutes(1);
+                DateTime nextOpenTime = WebAgent.GetTimestamps(data.Value.OpenTime).AddMinutes(1);
+
+                this.handler?.SaveIndexTime(this.lotteryCode,
+                new StepTimeModel(nextOpenTime.ToString("yyyyMMddHHmm"), WebAgent.GetTimestamps(nextOpenTime), WebAgent.GetTimestamps(nextOpenTime.AddSeconds(-50)))
+                );
+
             }
-
-            this.handler?.SaveIndexTime(this.lotteryCode,
-                new StepTimeModel(new item()
-                {
-                    time = now.ToString("MM月dd日 HH:mm")
-                }.index, WebAgent.GetTimestamps(now.AddSeconds(50)), WebAgent.GetTimestamps(now)));
-
             return list;
         }
 
@@ -77,11 +71,53 @@ namespace BetWin.Game.Lottery.Collects
                 "土星" => "6",
                 "天王星" => "5",
                 "海王星" => "4",
-                "开普勒星" => "3", 
+                "开普勒星" => "3",
                 _ => "0"
             };
         }
 
+        class response
+        {
+            public long time { get; set; }
+
+            public string? content { get; set; }
+
+            public string name
+            {
+                get
+                {
+                    if (string.IsNullOrEmpty(this.content)) return string.Empty;
+                    Regex regex = new Regex(@"(?<Name>.+)发现大量宝藏");
+                    if (!regex.IsMatch(this.content)) return string.Empty;
+                    return regex.Match(this.content).Groups["Name"].Value;
+                }
+            }
+
+            /// <summary>
+            /// 推算出的开奖时间
+            /// </summary>
+            public DateTime openTime
+            {
+                get
+                {
+                    DateTime now = WebAgent.GetTimestamps(this.time);
+                    int times = ((int)now.TimeOfDay.TotalSeconds - 50) / 60;
+
+                    return now.Date.AddSeconds(times * 60 + 50);
+                }
+            }
+
+            /// <summary>
+            /// 计算出的奖期
+            /// </summary>
+            public string index
+            {
+                get
+                {
+                    return this.openTime.ToString("yyyyMMddHHmm");
+                }
+            }
+        }
 
         class item
         {

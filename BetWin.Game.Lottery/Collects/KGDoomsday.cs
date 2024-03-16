@@ -43,12 +43,15 @@ namespace BetWin.Game.Lottery.Collects
 
         public override LotteryType Type => LotteryType.Smart;
 
+        static int timerIndex = 0;
+
         /// <summary>
         /// a.a.AES.decrypt(e,a.a.enc.Utf8.parse(u),{iv:a.a.enc.Utf8.parse(g),mode:a.a.mode.CBC,padding:a.a.pad.Pkcs7}).toString(a.a.enc.Utf8))
         /// </summary>
         /// <returns></returns>
         public override IEnumerable<CollectData> Execute()
         {
+            timerIndex++;
             var list = new List<CollectData>();
 
             CollectData? current = this.getCurrent();
@@ -56,9 +59,16 @@ namespace BetWin.Game.Lottery.Collects
             {
                 list.Add(current.Value);
             }
-
-            var logs = this.getLogs().Where(t => t.Index != current?.Index);
-            list.AddRange(logs);
+            else
+            {
+                Console.WriteLine($"{this.GetType().Name}读取当前期发生错误");
+            }
+            if (current == null || timerIndex % 30 == 0)
+            {
+                var logs = this.getLogs().Where(t => t.Index != current?.Index);
+                list.AddRange(logs);
+            }
+            
 
             // 根据当前期得到下一期的数据
             CollectData? bet = list.FirstOrDefault();
@@ -67,13 +77,10 @@ namespace BetWin.Game.Lottery.Collects
                 string? nextIndex = this.getNextIndex(bet.Value.Index);
                 if (nextIndex != null)
                 {
-
                     this.handler?.SaveIndexTime(this.lotteryCode, new StepTimeModel(nextIndex, bet.Value.OpenTime + 50 * 1000, bet.Value.OpenTime + 15 * 1000));
-
                 }
             }
-
-            return list.Where(t => t.Number != "0");
+            return list.Where(t => t.Number != "0").ToArray();
         }
 
         private string? getNextIndex(string roundId)
