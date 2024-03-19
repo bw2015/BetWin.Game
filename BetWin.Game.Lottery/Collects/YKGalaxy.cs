@@ -18,6 +18,8 @@ namespace BetWin.Game.Lottery.Collects
     {
         public string url { get; set; } = "http://api.a8.to/Common/API_GetData?key=YK.Galaxy";
 
+        public string record { get; set; } = "http://api.a8.to/Common/API_GetData?key=YK.Galaxy.Records";
+
         public YKGalaxy(string setting) : base(setting)
         {
         }
@@ -33,7 +35,20 @@ namespace BetWin.Game.Lottery.Collects
                 response? res = content.ToJson<response>();
                 if (res != null)
                 {
-                    list.Add(new CollectData(res.index, this.getNumber(res.name), WebAgent.GetTimestamps(res.openTime)));
+                    string number = this.getNumber(res.name);
+                    if (number != "0")
+                    {
+                        list.Add(new CollectData(res.index, number, WebAgent.GetTimestamps(res.openTime)));
+                    }
+                }
+
+                content = client.Get(record, new Dictionary<string, string>());
+                item[]? items = content.ToJson<item[]>();
+                foreach (item item in items ?? Array.Empty<item>())
+                {
+                    string number = this.getNumber(item.name);
+                    if (number == "0") continue;
+                    list.Add(new CollectData(item.index, number, WebAgent.GetTimestamps(item.openTime)));
                 }
             }
 
@@ -121,7 +136,7 @@ namespace BetWin.Game.Lottery.Collects
 
         class item
         {
-            public string name { get; set; }
+            public string star { get; set; }
 
             public string time { get; set; }
 
@@ -133,19 +148,25 @@ namespace BetWin.Game.Lottery.Collects
                 }
             }
 
+            /// <summary>
+            /// 星球名称
+            /// </summary>
+            public string name
+            {
+                get
+                {
+                    Regex regex = new Regex(@"宝藏星球：(?<Name>.+)（");
+                    if (!regex.IsMatch(this.star)) return string.Empty;
+                    return regex.Match(this.star).Groups["Name"].Value;
+                }
+            }
             public string index
             {
                 get
                 {
-                    // 游戏只在下午6点到凌晨2点之间开放
-                    if (this.openTime.Hour >= 2 && this.openTime.Hour < 18) return string.Empty;
-
-                    string date = this.openTime.ToString("yyyyMMdd");
-                    int minute = (int)this.openTime.TimeOfDay.TotalMinutes;
-                    return string.Concat(date, minute.ToString().PadLeft(4, '0'));
+                    return this.openTime.ToString("yyyyMMddHHmm");
                 }
             }
-
         }
     }
 }
