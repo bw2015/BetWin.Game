@@ -45,6 +45,22 @@ namespace BetWin.Game.Lottery.Collects
 
         static int timerIndex = 0;
 
+        static HttpClient? _client;
+        static HttpClient client
+        {
+            get
+            {
+                if (_client == null)
+                {
+                    _client = new HttpClient()
+                    {
+                        Timeout = TimeSpan.FromSeconds(3)
+                    };
+                }
+                return _client;
+            }
+        }
+
         /// <summary>
         /// a.a.AES.decrypt(e,a.a.enc.Utf8.parse(u),{iv:a.a.enc.Utf8.parse(g),mode:a.a.mode.CBC,padding:a.a.pad.Pkcs7}).toString(a.a.enc.Utf8))
         /// </summary>
@@ -68,7 +84,7 @@ namespace BetWin.Game.Lottery.Collects
                 var logs = this.getLogs().Where(t => t.Index != current?.Index);
                 list.AddRange(logs);
             }
-            
+
 
             // 根据当前期得到下一期的数据
             CollectData? bet = list.FirstOrDefault();
@@ -101,21 +117,19 @@ namespace BetWin.Game.Lottery.Collects
         /// <returns></returns>
         private CollectData? getCurrent()
         {
-            using (HttpClient client = new HttpClient())
-            {
-                HttpClientResponse result = client.Get(this.Url, new Dictionary<string, string>());
-                if (string.IsNullOrEmpty(result.Content)) return null;
-                JObject info = JObject.Parse(result);
+            HttpClientResponse result = client.Get(this.Url, new Dictionary<string, string>());
+            if (string.IsNullOrEmpty(result.Content)) return null;
+            JObject info = JObject.Parse(result);
 
-                string roundId = info["data"]?["roundId"]?.Value<string>() ?? string.Empty;
-                if (string.IsNullOrEmpty(roundId)) return null;
+            string roundId = info["data"]?["roundId"]?.Value<string>() ?? string.Empty;
+            if (string.IsNullOrEmpty(roundId)) return null;
 
-                string content = info["result"]?.Value<string>() ?? string.Empty;
-                responseResult? res = content.ToJson<responseResult>();
-                if (res == null) return null;
+            string content = info["result"]?.Value<string>() ?? string.Empty;
+            responseResult? res = content.ToJson<responseResult>();
+            if (res == null) return null;
 
-                return new CollectData(roundId, this.getNumber(res.monsterId), this.getOpenTime(roundId));
-            }
+            return new CollectData(roundId, this.getNumber(res.monsterId), this.getOpenTime(roundId));
+
         }
 
         /// <summary>
@@ -137,17 +151,14 @@ namespace BetWin.Game.Lottery.Collects
         /// </summary>
         private IEnumerable<CollectData> getLogs()
         {
-            using (HttpClient client = new HttpClient())
+            HttpClientResponse result = client.Get(this.logUrl, this.headers());
+
+            response? res = result.Content.ToJson<response>();
+            if (res == null) yield break;
+
+            foreach (var monster in res?.data?.monsterInfos ?? Array.Empty<monsterInfo>())
             {
-                HttpClientResponse result = client.Get(this.logUrl, this.headers());
-
-                response? res = result.Content.ToJson<response>();
-                if (res == null) yield break;
-
-                foreach (var monster in res?.data?.monsterInfos ?? Array.Empty<monsterInfo>())
-                {
-                    yield return new CollectData(monster.roundId, this.getNumber(monster.monsterId), this.getOpenTime(monster.roundId));
-                }
+                yield return new CollectData(monster.roundId, this.getNumber(monster.monsterId), this.getOpenTime(monster.roundId));
             }
         }
 
